@@ -106,12 +106,16 @@ select{appearance:auto}
 .step{display:flex;gap:10px;align-items:flex-start}
 .step>span{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accentInk);font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:6px}
 details.dd{margin-top:14px}
-details.dd>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;font-weight:700}
+details.dd>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px}
 details.dd>summary::-webkit-details-marker{display:none}
-details.dd>summary span{flex:1}
-details.dd>summary small{color:var(--muted);font-weight:500;font-size:12px;max-width:55%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-details.dd>summary::after{content:"▾";color:var(--muted);transition:transform .15s}
-details.dd[open]>summary::after{transform:rotate(180deg)}
+details.dd>summary .ddt{flex:1;min-width:0}
+details.dd>summary .ddt b{display:block;font-size:15px;font-weight:700}
+details.dd>summary small{display:block;color:var(--muted);font-weight:500;font-size:12.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ddi{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none;background:var(--oBg);color:var(--accent);border:1px solid var(--oB)}
+.ddi svg{width:20px;height:20px}
+.ddi.lift{background:var(--bBg);color:var(--blue);border-color:transparent} .ddi.data{background:var(--gBg);color:var(--good);border-color:transparent}
+details.dd>summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .2s;margin-right:4px;flex:none}
+details.dd[open]>summary::after{transform:rotate(45deg) translate(-2px,-2px)}
 details.dd[open]>summary{border-color:var(--oB);margin-bottom:10px}
 .ddh{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:700;margin:14px 2px 8px}
 .bday{padding:12px}
@@ -442,12 +446,50 @@ nav button{min-width:0}
 .kd span{font-size:12px;font-weight:700;margin-left:3px} .kd.on{filter:none;opacity:1;border-color:var(--oB);background:var(--oBg)} .kd:disabled{opacity:.5}
 .sharerow{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}
 .sharerow span{flex:1} .sharerow small{display:block;margin-top:2px} .sharerow input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.frpv{border-color:var(--oB);background:linear-gradient(160deg,var(--cBg),var(--panel));margin:6px 0 16px} .frpv b{font-size:15px} .frpv .muted{font-size:13px;line-height:1.45;margin-top:3px}
+.fday{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:14px 4px 6px}
+.flist{padding:2px 14px}
+.fr{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)} .fr:last-child{border-bottom:0}
+.fr .av{width:32px;height:32px;font-size:13px}
+.fb{min-width:0;flex:1;display:block}
+.fl1{display:flex;align-items:center;gap:7px;font-size:14px;min-width:0} .fl1 b{white-space:nowrap}
+.fl1 .fs{color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none} .dot.cardio{background:var(--blue)} .dot.mix{background:linear-gradient(90deg,var(--accent) 50%,var(--blue) 50%)}
+.fl2{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fhl2{display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kd2{flex:none;background:none;border:0;font-size:16px;padding:6px 4px;filter:grayscale(1);opacity:.55;color:var(--text);display:flex;align-items:center;gap:3px}
+.kd2 span{font-size:12.5px;font-weight:700} .kd2.on{filter:none;opacity:1} .kd2:disabled{opacity:.4}
+.kd2.on span{color:var(--accent)}
+.vbuild{text-align:center;font-size:11.5px;color:var(--muted);margin:22px 0 4px;letter-spacing:.3px;font-variant-numeric:tabular-nums} .vbuild i{font-style:normal;color:var(--accent)}
+.hright{display:flex;align-items:center;gap:12px}
+.helpbtn{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--text2);font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex:none;padding:0}
+.tour{text-align:center}
+.tour .tskip{position:absolute;top:calc(16px + env(safe-area-inset-top));right:20px;font-size:14px;color:var(--muted)}
+.tbody{margin:auto 0;padding:20px 6px}
+.ticon{width:96px;height:96px;margin:0 auto 18px;border-radius:28px;background:var(--panel);border:1px solid var(--oB);display:flex;align-items:center;justify-content:center;font-size:46px;box-shadow:0 10px 30px rgba(255,122,26,.18)}
+.tstep{font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.tbody h3{font-size:25px;margin:8px 0 10px;letter-spacing:-.3px}
+.tbody p{font-size:15.5px;line-height:1.55;color:var(--text2);max-width:380px;margin:0 auto}
+.tdots{display:flex;justify-content:center;gap:7px;margin:10px 0 18px} .tdots i{width:7px;height:7px;border-radius:4px;background:var(--line);transition:all .2s;cursor:pointer} .tdots i.on{width:22px;background:var(--accent)}
+.tnav{gap:10px} .tnav>*{flex:1;padding:14px;font-size:15px;border-radius:14px}
+.tourcta,.helprow{display:flex;align-items:center;gap:13px;width:100%;text-align:left}
+.tourcta{border-color:var(--oB);background:linear-gradient(160deg,var(--cBg),var(--panel));margin-top:8px}
+.tourcta b,.helprow b{display:block;font-size:15px;color:var(--text)} .tourcta small,.helprow small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.ti{width:38px;height:38px;border-radius:11px;background:var(--accent);color:#141414;display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
+.helprow{margin-top:14px} .helprow .ti{background:var(--panel2);color:var(--text2);border:1px solid var(--line)}
+.chev{color:var(--muted);font-size:20px}
+.faq{padding:2px 14px} .faq details{border-bottom:1px solid var(--line)} .faq details:last-child{border-bottom:0}
+.faq summary{list-style:none;cursor:pointer;padding:13px 22px 13px 0;font-weight:600;font-size:14.5px;position:relative}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"";position:absolute;right:4px;top:50%;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+.faq details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+.faq details>div{font-size:13.5px;line-height:1.55;color:var(--text2);padding:0 0 14px}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><svg class="mark" viewBox="0 0 512 512" aria-hidden="true"><polyline points="132,262 256,138 380,262" fill="none" style="stroke:var(--accent)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/><g style="fill:var(--text)"><rect x="104" y="348" width="304" height="22" rx="11"/><rect x="138" y="296" width="40" height="126" rx="12"/><rect x="108" y="320" width="26" height="78" rx="9"/><rect x="334" y="296" width="40" height="126" rx="12"/><rect x="378" y="320" width="26" height="78" rx="9"/></g></svg><b class="bt">UP<i>/</i>LIFT</b></div>
-  <div class="count" id="countdown"></div>
+  <div class="hright"><div class="count" id="countdown"></div><button class="helpbtn" id="helpBtn" aria-label="Help">?</button></div>
 </header>
 
 <main>
@@ -682,7 +724,7 @@ let view="log";
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.v));
 function show(v){ view=v; document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
   ["log","progress","friends","baseline"].forEach(x=>$("#view-"+x).classList.toggle("hidden",x!==v));
-  if(v==="friends"){ renderFriends(); const c=friendsCache; if(!c||Date.now()-new Date(c.at)>30000) loadFriends(); }
+  if(v==="friends"){ renderFriends(); const c=friendsCache; if(signedIn()&&(!c||Date.now()-new Date(c.at)>30000)) loadFriends(); }
   if(v==="baseline") renderBaseline(); if(v==="progress") renderProgress(); if(v==="log") renderLog(); window.scrollTo(0,0); }
 
 /* ================== LOG VIEW ================== */
@@ -762,7 +804,7 @@ function renderLog(){
 // Empty (operating) weights, rounded: Cessna 172 ~762 kg, ATR 72-600 ~13,500 kg (typical in-service), 737-800 ~41,000 kg, 777-300ER ~167,800 kg, A380 ~277,000 kg
 const AIRCRAFT=[{n:"Cessna 172",kg:762},{n:"ATR 72",kg:13500},{n:"Boeing 737",kg:41000},{n:"Boeing 777",kg:167800},{n:"Airbus A380",kg:277000}];
 // Great-circle distances from Kuala Lumpur (KUL), worked out from airport coordinates
-const AIRPORTS={SIN:[1.3644,103.9915],PEN:[5.2971,100.2770],KCH:[1.4847,110.3470],BKK:[13.6900,100.7501],BKI:[5.9372,116.0510],HKG:[22.3080,113.9185],NRT:[35.7720,140.3929],SYD:[-33.9399,151.1753],LHR:[51.4700,-0.4543]};
+const AIRPORTS={SZB:[3.1306,101.5490],SIN:[1.3644,103.9915],PEN:[5.2971,100.2770],HKT:[8.1132,98.3169],KCH:[1.4847,110.3470],BKI:[5.9372,116.0510],HKG:[22.3080,113.9185],KIX:[34.4347,135.2440],SYD:[-33.9399,151.1753],LHR:[51.4700,-0.4543]};
 function gcKm(a,b){ const R=6371, r=x=>x*Math.PI/180, dLat=r(b[0]-a[0]), dLon=r(b[1]-a[1]);
   const s=Math.sin(dLat/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dLon/2)**2; return 2*R*Math.asin(Math.sqrt(s)); }
 const ROUTES=Object.entries(AIRPORTS).map(([c,ll])=>({c, km:gcKm([2.7456,101.7099],ll)})).sort((a,b)=>a.km-b.km);
@@ -1260,6 +1302,12 @@ function renderEnergy(){
       ${wk.length?`<br>Logged workouts, last 7 days: ~${wk.reduce((a,b)=>a+b,0)} kcal over ${wk.length} session${wk.length>1?"s":""}.`:""}
     </div>`;
 }
+function ddIcon(k){
+  const P={goal:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
+    lift:'<path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/>',
+    data:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>'};
+  return `<i class="ddi ${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[k]}</svg></i>`;
+}
 function renderBaseline(){
   const el=$("#view-baseline"); const B=LS.get("liftlog.baseline",{})||{};
   const seen=new Set(); const groups=[];
@@ -1303,7 +1351,7 @@ function renderBaseline(){
       <div class="muted" id="actDesc" style="font-size:12px;margin-top:6px;line-height:1.4"></div>
     </div>
     <div class="card energy" id="energyCard"></div>
-    <details class="dd" data-dd="goals" ${DD.goals?"open":""}><summary><span>Goals &amp; event</span><small>${esc([P.race, P.goalKg&&P.goalKg+" kg", P.goalBf&&P.goalBf+"%"].filter(Boolean).join(" · ")||"Not set")}</small></summary>
+    <details class="dd" data-dd="goals" ${DD.goals?"open":""}><summary>${ddIcon("goal")}<span class="ddt"><b>Goals</b><small>${esc([P.race, P.goalKg&&P.goalKg+" kg", P.goalBf&&P.goalBf+"% body fat"].filter(Boolean).join(" · ")||"Target weight and event date")}</small></span></summary>
     <div class="card">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <label><span class="muted" style="font-size:12px">Event or goal</span><input data-p="race" value="${esc(P.race||"")}" placeholder="e.g. 10K race, reach 75 kg"></label>
@@ -1314,16 +1362,18 @@ function renderBaseline(){
       <label style="display:block;margin-top:8px"><span class="muted" style="font-size:12px">About you &amp; your goals (for coach feedback)</span>
       <textarea data-p="about" placeholder="e.g. What you're training for, experience, injuries, days per week, equipment, anything the coach should know">${esc(P.about||"")}</textarea></label>
     </div></details>
-    <details class="dd" data-dd="base" ${DD.base?"open":""}><summary><span>Baseline &amp; targets</span><small>${nBase} lift${nBase===1?"":"s"} set</small></summary>
+    <details class="dd" data-dd="base" ${DD.base?"open":""}><summary>${ddIcon("lift")}<span class="ddt"><b>Starting weights</b><small>${nBase?`${nBase} lift${nBase===1?"":"s"} set`:"What you can lift today"}</small></span></summary>
     <div class="card" style="font-size:13px;line-height:1.5;color:var(--text2)">For each exercise, set the <b style="color:var(--text)">🎯 target</b> (sets × rep range · rest) and what you can do <b style="color:var(--text)">right now for one solid set</b>, leaving 1–2 reps in the tank (not your 1-rep max). Workouts then suggest the weight and reps for every set. Once you've logged an exercise (<span class="tag">logged</span>), suggestions come from your latest session instead. Saves as you type. <span id="blSaved" class="muted"></span></div>
     ${groups.map(g=>`<div class="ddh">${esc(g.title)}</div><div class="card">${g.items.map(row).join("")}</div>`).join("")}
     <button class="btn block" id="blAdd" style="margin-top:4px">＋ Add another lift</button>
     </details>
-    <details class="dd" data-dd="backup" ${DD.backup?"open":""}><summary><span>Backup &amp; data</span><small>${LS.get("liftlog.lastBackup",null)?"Last "+fmtDate(LS.get("liftlog.lastBackup",null),{day:"numeric",month:"short"}):"Never backed up"}</small></summary>${backupHtml()}</details>
+    <details class="dd" data-dd="backup" ${DD.backup?"open":""}><summary>${ddIcon("data")}<span class="ddt"><b>Your data</b><small>${signedIn()?`Synced to @${esc(getAuth().username||"you")}`:LS.get("liftlog.lastBackup",null)?"Backed up "+fmtDate(LS.get("liftlog.lastBackup",null),{day:"numeric",month:"short"}):"Backup, restore, sample data"}</small></span></summary>${backupHtml()}</details>
     <h2>Appearance</h2>
     <div class="seg" id="themeSeg">${[["auto","Auto"],["light","☀ Light"],["dark","☾ Dark"]].map(([k,l])=>`<button data-theme="${k}" class="${(LS.get("liftlog.theme","auto"))===k?"on":""}">${l}</button>`).join("")}</div>
     <div class="muted" style="font-size:12px;margin:6px 2px 0">Auto follows your phone's light or dark setting.</div>
-    <button class="card" data-setup2 style="display:block;width:100%;text-align:left;border-color:var(--oB);margin-top:14px"><b style="color:var(--text)">✦ Get a personal plan</b><div class="muted" style="font-size:13px;margin-top:4px;line-height:1.4">Chat with Claude about your goals and it fills in this page, your starting weights and a program made for you.</div></button>`;
+    <button class="card" data-setup2 style="display:block;width:100%;text-align:left;border-color:var(--oB);margin-top:14px"><b style="color:var(--text)">✦ Get a personal plan</b><div class="muted" style="font-size:13px;margin-top:4px;line-height:1.4">Chat with Claude about your goals and it fills in this page, your starting weights and a program made for you.</div></button>
+    <button class="card helprow" data-help><span class="ti">?</span><span class="sp"><b>Help &amp; tour</b><small>How the app works, questions and tips</small></span><span class="chev">›</span></button>
+    <div class="vbuild">UP<i>/</i>LIFT v${APP.version}.${APP.build} · ${APP.date}</div>`;
   el.querySelectorAll("details.dd").forEach(d=>d.ontoggle=()=>{ const s=LS.get("liftlog.dd",{})||{}; s[d.dataset.dd]=d.open; LS.set("liftlog.dd",s); });
   const flash=()=>{ const s=$("#blSaved"); if(s){ s.textContent="✓ Saved"; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent="",1200); } };
   el.querySelectorAll("[data-p]").forEach(inp=>{ inp.oninput=inp.onchange=()=>{ const pr=getProfile(); const v=inp.value.trim(); if(v) pr[inp.dataset.p]=inp.value; else delete pr[inp.dataset.p]; LS.set("liftlog.profile",pr); renderCountdown(); renderEnergy();
@@ -1333,6 +1383,7 @@ function renderBaseline(){
   pw.onchange=async()=>{ const kg=num(pw.value); if(kg&&kg>=30&&kg<=250&&kg!==(weights[0]&&weights[0].kg)){ try{ await putWeight(kg); }catch(e){} } renderEnergy(); };
   renderEnergy();
   el.querySelector("[data-setup2]").onclick=openSetupSheet;
+  el.querySelector("[data-help]").onclick=openHelp;
   bindBackup();
   el.querySelectorAll("[data-btgt]").forEach(b=>b.onclick=()=>{ const n=b.dataset.btgt; targetModal(n,targetFor(n),()=>{ const y=window.scrollY; renderBaseline(); window.scrollTo(0,y); }); });
   el.querySelectorAll("input[data-b]").forEach(inp=>{
@@ -2116,7 +2167,7 @@ function cardioSectionHtml(cardio){
   const box=runSummaryHtml();
   const rows=cardio.map(e=>`<button class="prrow cx" data-cxd="${esc(e.name)}"><div class="nm">${esc(e.name)}<small>best ${e.kind==="c"?`${kmTxt(e.best.d)} in ${fmtTime(e.best.t)}`:`${e.best.a??""}${e.unit?" "+e.unit:""}${e.best.w?" @"+e.best.w+"kg":""}`}</small></div><div>${spark(e.pts,84,26,e.kind==="c"?"var(--blue)":"var(--good)")}</div><div class="v">${e.kind==="c"?fmtTime(Math.round(e.best.p))+"/km":fmtTime(e.best.t)}<span class="chev">›</span></div></button>`).join("");
   return `<h2>${title}</h2>
-    <div class="card cardiocard">${box}${rows?`<div class="crows">${rows}</div>`:`<div class="muted" style="font-size:13px;padding:14px">Log a run or HYROX sim to see pace trends.</div>`}</div>`;
+    <div class="card cardiocard">${box}${rows?`<div class="crows">${rows}</div>`:`<div class="muted" style="font-size:13px;padding:14px">Log a run to see your pace trends.</div>`}</div>`;
 }
 function renderProgress(){
   const el=$("#view-progress");
@@ -2501,13 +2552,23 @@ function lbRows(week,from,to){
   return Object.values(m);
 }
 const LBM={sessions:{l:"Sessions",f:v=>v,u:""},kg:{l:"Lifted",f:v=>kgParts(v).join(" "),u:""},km:{l:"Distance",f:v=>v.toFixed(1),u:" km"},minutes:{l:"Time",f:v=>v>=100?Math.floor(v/60)+"h "+String(Math.round(v%60)).padStart(2,"0"):Math.round(v),u:" min"}};
+function previewFriends(){ // made-up group shown when signed out, so people can see what the tab looks like
+  let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const S=makeSampleData().sessions, me=(getProfile().name||"you").toLowerCase().replace(/[^a-z0-9._-]/g,"")||"you";
+  const people=[{id:"p_me",n:me},{id:"p_sam",n:"sam"},{id:"p_mei",n:"mei.runs"},{id:"p_raj",n:"raj"},{id:"p_jo",n:"jo_lifts"}];
+  const plan=[[0,0,1],[1,0,0],[2,1,4],[3,2,1],[4,1,2],[5,3,3],[6,4,0],[7,2,0],[8,1,5],[9,3,2],[10,4,1],[11,0,3],[12,1,8],[13,2,6],[14,4,7],[15,0,9],[16,3,10],[17,1,11]];
+  const feed=[];
+  plan.forEach(([si,pi,ago],n)=>{ const s=JSON.parse(JSON.stringify(S[si%S.length])); const t=new Date(); t.setDate(t.getDate()-ago); t.setHours(6+((n*5)%14),(n*17)%60,0,0);
+    if(t>new Date()) t.setHours(t.getHours()-12); s.id="pv"+n; s.date=t.toISOString(); const r=feedRow(s,people[pi].id); r.username=people[pi].n; feed.push(r); });
+  feed.sort((a,b)=>b.started_at.localeCompare(a.started_at));
+  const kudos=[]; feed.forEach(f=>people.forEach(u=>{ if(u.id!==f.user_id&&u.id!=="p_me"&&rnd()<0.35) kudos.push({user_id:u.id,owner_id:f.user_id,session_id:f.session_id}); }));
+  return {feed:feed.slice(0,30),week:feed,kudos,at:new Date().toISOString(),preview:true,me:"p_me"};
+}
+let previewCache=null;
 function renderFriends(){
   const el=$("#view-friends");
-  if(!signedIn()){ el.innerHTML=`<h2>Friends</h2><div class="card fr-empty"><div class="big">🏆</div><b>Train with your friends</b>
-    <div class="muted">See a weekly leaderboard and what everyone's been up to. Sign in or create an account to join.</div>
-    <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn small primary" data-auth="signup">Create account</button><button class="btn small" data-auth="login">Sign in</button></div></div>`;
-    el.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth)); return; }
-  const me=getAuth().user.id, C=friendsCache||{feed:[],week:[],kudos:[]};
+  const preview=!signedIn(); if(preview&&!previewCache) previewCache=previewFriends();
+  const C=preview?previewCache:(friendsCache||{feed:[],week:[],kudos:[]}), me=preview?C.me:getAuth().user.id;
   const ws=weekStart(), we=new Date(ws); we.setDate(we.getDate()+7); const lw=new Date(ws); lw.setDate(lw.getDate()-7);
   const rows=lbRows(C.week,ws,null).sort((a,b)=>b[lbMetric]-a[lbMetric]||b.sessions-a.sessions);
   const last=lbRows(C.week,lw,ws).sort((a,b)=>b[lbMetric]-a[lbMetric])[0];
@@ -2515,7 +2576,8 @@ function renderFriends(){
   const medal=i=>["🥇","🥈","🥉"][i]||`<span class="rk">${i+1}</span>`;
   const max=Math.max(1,...rows.map(r=>r[lbMetric]));
   const kc=(o,s)=>C.kudos.filter(k=>k.owner_id===o&&k.session_id===s), mine=(o,s)=>kc(o,s).some(k=>k.user_id===me);
-  el.innerHTML=`
+  el.innerHTML=`${preview?`<div class="card frpv"><b>👀 Preview with sample friends</b><div class="muted">This is what Friends looks like with a group. Create an account or sign in to see your real friends' week.</div>
+      <div class="row" style="gap:8px;margin-top:10px"><button class="btn small primary" data-auth="signup">Create account</button><button class="btn small" data-auth="login">Sign in</button></div></div>`:""}
     <div class="row" style="margin:6px 2px 10px;align-items:flex-end"><h2 class="sp" style="margin:0">This week</h2><span class="muted" style="font-size:12px">${fmtDate(ws,{day:"numeric",month:"short"})} – ${fmtDate(new Date(we-1),{day:"numeric",month:"short"})} · resets in ${daysLeft} day${daysLeft===1?"":"s"}</span></div>
     <div class="card lb">
       <div class="seg lbseg">${Object.entries(LBM).map(([k,v])=>`<button data-lbm="${k}" class="${k===lbMetric?"on":""}">${v.l}</button>`).join("")}</div>
@@ -2525,34 +2587,79 @@ function renderFriends(){
       :`<div class="muted" style="font-size:13px;padding:14px 4px;text-align:center">Nobody's trained yet this week. Be the first on the board 💪</div>`}
       ${last?`<div class="lbl">Last week's ${M.l.toLowerCase()} leader: <b>@${esc(last.name)}</b> · ${M.f(last[lbMetric])}${M.u}</div>`:""}
     </div>
-    <div class="row" style="margin:20px 2px 10px;align-items:center"><h2 class="sp" style="margin:0">Activity</h2><button class="lnk" id="frRefresh" style="font-size:13px">${friendsLoading?"Loading…":"↻ Refresh"}</button></div>
-    ${friendsErr?`<div class="banner">${esc(friendsErr)}</div>`:""}
-    ${!shareOn()?`<div class="banner">You're not sharing your sessions, so friends can't see yours. Turn it on in Profile → Account.</div>`:""}
-    ${C.feed.length?C.feed.map(f=>{ const k=kc(f.user_id,f.session_id).length, my=mine(f.user_id,f.session_id), self=f.user_id===me;
-      const chips=[f.minutes&&`${f.minutes>=100?Math.floor(f.minutes/60)+"h "+String(f.minutes%60).padStart(2,"0"):f.minutes+" min"}`, f.kg&&kgParts(+f.kg).join(" "), f.km&&`${(+f.km).toFixed(1)} km`, f.pace_s&&!f.kg&&`${fmtTime(f.pace_s)}/km`].filter(Boolean);
-      return `<div class="fi ${f.kind}"><div class="av">${esc((f.username||"?").slice(0,1).toUpperCase())}</div>
-        <div class="sp"><div class="fh"><b>@${esc(f.username||"friend")}</b><span class="muted">${agoText(f.started_at)}</span></div>
-          <div class="ft">finished <b>${esc(f.title)}</b></div>
-          ${chips.length?`<div class="fc">${chips.map(c=>`<span>${esc(c)}</span>`).join("")}</div>`:""}
-          ${f.highlight&&f.kind!=="cardio"?`<div class="fhl">★ ${esc(f.highlight)}</div>`:""}
-        </div>
-        <button class="kd ${my?"on":""}" data-kudo="${f.user_id}|${esc(f.session_id)}" ${self?"disabled":""} title="${self?"Your session":"Give kudos"}">🔥${k?`<span>${k}</span>`:""}</button></div>`; }).join("")
+    <div class="row" style="margin:20px 2px 10px;align-items:center"><h2 class="sp" style="margin:0">Activity</h2>${preview?"":`<button class="lnk" id="frRefresh" style="font-size:13px">${friendsLoading?"Loading…":"↻ Refresh"}</button>`}</div>
+    ${friendsErr&&!preview?`<div class="banner">${esc(friendsErr)}</div>`:""}
+    ${!preview&&!shareOn()?`<div class="banner">You're not sharing your sessions, so friends can't see yours. Turn it on in Profile → Account.</div>`:""}
+    ${C.feed.length?(()=>{ const today=new Date(); today.setHours(0,0,0,0); const yest=new Date(today); yest.setDate(yest.getDate()-1);
+      const dayLabel=d=>{ const x=new Date(d); x.setHours(0,0,0,0); return +x===+today?"Today":+x===+yest?"Yesterday":fmtDate(d,{weekday:"short",day:"numeric",month:"short"}); };
+      const groups=[]; C.feed.forEach(f=>{ const l=dayLabel(f.started_at); let g=groups[groups.length-1]; if(!g||g.l!==l) groups.push(g={l,items:[]}); g.items.push(f); });
+      return groups.map(g=>`<div class="fday">${g.l}</div><div class="card flist">${g.items.map(f=>{ const k=kc(f.user_id,f.session_id).length, my=mine(f.user_id,f.session_id), self=f.user_id===me;
+        const stats=[f.kg&&kgParts(+f.kg).join(" "), f.km&&`${(+f.km).toFixed(1)} km`, f.minutes&&(f.minutes>=100?Math.floor(f.minutes/60)+"h "+String(f.minutes%60).padStart(2,"0"):f.minutes+" min"), f.pace_s&&!f.kg&&`${fmtTime(f.pace_s)}/km`].filter(Boolean);
+        return `<div class="fr"><div class="av">${esc((f.username||"?").slice(0,1).toUpperCase())}</div>
+          <div class="sp fb"><div class="fl1"><b>${self?"You":esc(f.username||"friend")}</b><span class="dot ${f.kind}"></span><span class="fs">${esc(f.title)}</span></div>
+            <div class="fl2">${stats.map(esc).join(" · ")}${f.highlight&&f.kind!=="cardio"?`<span class="fhl2">★ ${esc(f.highlight)}</span>`:""}</div></div>
+          <button class="kd2 ${my?"on":""}" data-kudo="${f.user_id}|${esc(f.session_id)}" ${self?"disabled":""} aria-label="Kudos">🔥${k?`<span>${k}</span>`:""}</button></div>`; }).join("")}</div>`).join(""); })()
     :`<div class="card muted" style="font-size:13px;text-align:center;padding:20px">No activity yet. Finished sessions from everyone in the group show up here.</div>`}
-    <div class="muted" style="font-size:11.5px;line-height:1.45;margin:14px 4px 0">Friends see each session's name, time, tons or km and one highlight, never your notes, weigh-ins or full workouts. ${C.at?`Updated ${agoText(C.at)}.`:""}</div>`;
+    <div class="muted" style="font-size:11.5px;line-height:1.45;margin:14px 4px 0">Friends see each session's name, time, tons or km and one highlight, never your notes, weigh-ins or full workouts. ${C.at&&!preview?`Updated ${agoText(C.at)}.`:""}</div>`;
+  el.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth));
   el.querySelectorAll("[data-lbm]").forEach(b=>b.onclick=()=>{ lbMetric=b.dataset.lbm; renderFriends(); });
   const rf=$("#frRefresh"); if(rf) rf.onclick=()=>{ loadFriends(); renderFriends(); };
   el.querySelectorAll("[data-kudo]").forEach(b=>b.onclick=()=>toggleKudo(...b.dataset.kudo.split("|")));
 }
 async function toggleKudo(owner,sid){
-  const me=getAuth().user.id, C=friendsCache; if(!C) return;
+  const pv=!signedIn(), C=pv?previewCache:friendsCache; if(!C) return; const me=pv?C.me:getAuth().user.id;
   const had=C.kudos.some(k=>k.user_id===me&&k.owner_id===owner&&k.session_id===sid);
   C.kudos = had ? C.kudos.filter(k=>!(k.user_id===me&&k.owner_id===owner&&k.session_id===sid)) : C.kudos.concat({user_id:me,owner_id:owner,session_id:sid});
-  renderFriends();
+  renderFriends(); if(pv) return;
   try{
     if(had) await api(`/rest/v1/kudos?user_id=eq.${me}&owner_id=eq.${owner}&session_id=eq.${encodeURIComponent(sid)}`,{method:"DELETE"});
     else await api("/rest/v1/kudos",{method:"POST",headers:{Prefer:"return=minimal,resolution=ignore-duplicates"},body:JSON.stringify([{user_id:me,owner_id:owner,session_id:sid}])});
     LS.set("liftlog.friendsCache",C);
   }catch(e){ showBanner("Couldn't save kudos: "+e.message); loadFriends(); }
+}
+
+const APP={version:"1.0", build:37, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
+/* ================== HELP & TOUR ================== */
+const TOUR=[
+  {i:"👋",t:"Welcome to UP/LIFT",b:"Log your workouts, see your progress and train alongside friends. It runs in your browser: nothing to install, no ads, and everything is saved on your phone."},
+  {i:"📋",t:"Pick a program",b:"Choose a starter plan (Push/Pull/Legs, Upper/Lower or Run), build your own, or let Claude design one around you. Your program's days appear on the <b>Log</b> page: tap one to start."},
+  {i:"✅",t:"Log as you train",b:"Type the weight and reps, then tap <b>✓</b>. The next set fills in for you and the rest timer starts. <b>RIR</b> is reps left in the tank. The 🎯 target tells you when it's time to add weight."},
+  {i:"📈",t:"Watch yourself progress",b:"<b>Progress</b> shows your month on a calendar, bodyweight, working loads and running pace. Tap any lift or run to see its chart, best efforts and history."},
+  {i:"✦",t:"Claude as your coach",b:"Copy a ready-made prompt into Claude and paste the reply back: get a personal plan, today's workout, feedback on a session, or turn notes and watch screenshots into logged sessions."},
+  {i:"🏆",t:"Train with friends",b:"Create an account with the invite code from whoever shared the app. Your training backs up and syncs across devices, and <b>Friends</b> shows a weekly leaderboard and what everyone's been up to."},
+  {i:"📲",t:"Add it to your home screen",b:"It opens full screen like an app. <b>Android (Chrome):</b> menu ⋮ → Add to Home screen. <b>iPhone (Safari):</b> Share → Add to Home Screen. You can replay this tour from the <b>?</b> button any time."}];
+function openTour(i=0){
+  LS.set("liftlog.toured",true);
+  const s=TOUR[i], last=i===TOUR.length-1;
+  modal(`<div class="sheet auth tour">
+    <button class="lnk tskip" data-close>${last?"Close":"Skip"}</button>
+    <div class="tbody"><div class="ticon">${s.i}</div><div class="tstep">${i+1} of ${TOUR.length}</div><h3>${s.t}</h3><p>${s.b}</p></div>
+    <div class="tdots">${TOUR.map((_,k)=>`<i class="${k===i?"on":""}" data-tgo="${k}"></i>`).join("")}</div>
+    <div class="row tnav">${i?`<button class="btn" data-tgo="${i-1}">Back</button>`:`<span></span>`}<button class="btn primary" ${last?"data-close":`data-tgo="${i+1}"`}>${last?"Let's go 💪":"Next"}</button></div>
+  </div>`);
+  document.querySelectorAll("[data-tgo]").forEach(b=>b.onclick=()=>openTour(+b.dataset.tgo));
+  const sh=document.querySelector(".tour"); let sx=null;
+  sh.addEventListener("touchstart",e=>{ sx=e.touches[0].clientX; },{passive:true});
+  sh.addEventListener("touchend",e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(Math.abs(dx)>50){ const n=i+(dx<0?1:-1); if(n>=0&&n<TOUR.length) openTour(n); } });
+}
+const FAQ=[
+  ["How do I log a workout?","On <b>Log</b>, tap a day from your program (or <b>Empty session</b>). Enter kg and reps for each set and tap ✓. When you're done, tap <b>Finish &amp; save</b>. Forgot to log? Use <b>＋ Add a past session</b> and paste your notes or a watch screenshot via Claude."],
+  ["What do RIR and the 🎯 target mean?","<b>RIR</b> (reps in reserve) is how many more reps you could have done: 0 means to failure, 2 means two left. The 🎯 target is the sets × rep range and rest. Hit the top of the range on every set and the app suggests adding weight next time."],
+  ["How do I change or build a program?","Tap <b>Change</b> next to your program on the Log page. Pick a starter plan, edit the one you have, build your own, or ask Claude. Programs you switch away from are kept under <b>My programs</b>."],
+  ["Can I log runs and watch data?","Yes. Runs take distance (e.g. <i>5k</i> or <i>29.39</i>), time and pace: fill in any two. Open <b>⌚ From your watch</b> to add active calories, average heart rate and elevation."],
+  ["How are calories worked out?","Daily calories use your profile (Mifflin-St Jeor, or Katch-McArdle if you add body fat). Workout calories are estimates from the type and length of training, unless you enter your watch's active calories."],
+  ["Is my data safe? What do friends see?","Without an account, everything stays on this device: use <b>Profile → Your data → Download backup</b> now and then. With an account it syncs to the cloud and only you can read it. Friends only see each session's name, time, tons or km and one highlight, and you can turn sharing off in Profile."],
+  ["I forgot my password","There's no email reset. Ask whoever shared the app with you to reset it for you."],
+  ["The app looks out of date","Close it fully and open it again; updates download in the background. Your version is shown at the bottom of Profile."]];
+function openHelp(){
+  modal(`<div class="sheet help">
+    <div class="row"><h3 class="sp">Help</h3><button class="iconbtn" data-close>✕</button></div>
+    <button class="card tourcta" id="hTour"><span class="ti">▶</span><span class="sp"><b>Take the quick tour</b><small>7 short cards · about a minute</small></span><span class="chev">›</span></button>
+    <h2>Questions</h2>
+    <div class="card faq">${FAQ.map(([q,a])=>`<details><summary>${q}</summary><div>${a}</div></details>`).join("")}</div>
+    <div class="vbuild">UP<i>/</i>LIFT v${APP.version}.${APP.build} · ${APP.date}</div>
+  </div>`);
+  $("#hTour").onclick=()=>openTour(0);
 }
 
 /* ================== BOOT ================== */
@@ -2563,6 +2670,8 @@ mode="local";
 sessions=LS.get("liftlog.sessions",[]); weights=LS.get("liftlog.weights",[]);
 renderLog();
 if(signedIn()) setTimeout(()=>syncNow(),800);
+$("#helpBtn").onclick=openHelp;
+if(!LS.get("liftlog.toured",false) && !sessions.length && !signedIn()) setTimeout(()=>openTour(0),500);
 try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(e){}
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 </script>
