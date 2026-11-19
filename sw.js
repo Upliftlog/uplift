@@ -1,5 +1,5 @@
 // UP/LIFT offline cache. Bump VERSION whenever you upload a new index.html.
-const VERSION = "uplift-v17";
+const VERSION = "uplift-v26";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "icon.svg"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -12,6 +12,8 @@ self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  // never cache account/sync traffic: it must always hit the server
+  if (url.hostname.endsWith(".supabase.co") || url.pathname.startsWith("/rest/") || url.pathname.startsWith("/auth/")) return;
   if (url.origin !== location.origin) {
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(res => {
       const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return res;
