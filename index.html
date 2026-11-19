@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0e0f12">
 <title>UP/LIFT</title>
 <link rel="manifest" href="manifest.json">
@@ -329,6 +329,24 @@ textarea{min-height:70px;resize:vertical}
 .dlg{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:auto 16px;max-width:380px;width:100%}
 .dlg p{margin:0 0 16px;line-height:1.45}
 .center{align-items:center}
+/* ---- mobile polish: notch / home-bar safe areas, no zoom-on-tap, bigger tap targets ---- */
+input,textarea,select,.setrow input{font-size:16px}
+header{padding-top:calc(14px + env(safe-area-inset-top));padding-left:calc(16px + env(safe-area-inset-left));padding-right:calc(16px + env(safe-area-inset-right))}
+nav{padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+body.resting{padding-bottom:calc(160px + env(safe-area-inset-bottom))}
+.rest{bottom:calc(78px + env(safe-area-inset-bottom))}
+.toast{top:calc(70px + env(safe-area-inset-top))}
+.sheet{padding-bottom:calc(28px + env(safe-area-inset-bottom))}
+.bfoot{padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.tgt.sm{padding:8px 10px}
+button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
+.tgt{padding:7px 12px}
+#restLbl{line-height:1.25;min-width:0}
+@media (max-width:380px){ .rest{gap:6px;left:8px;right:8px} .rest .t{font-size:22px;min-width:64px} .rest .btn.small{padding-left:10px;padding-right:10px} }
+@media (max-width:350px){ #restLbl{display:none} #restMinus{margin-left:auto}
+  .wstats{gap:6px} .wstats>div{padding:10px 8px} .wstats b{font-size:20px} .wstats small{font-size:10px;letter-spacing:.4px} .wstats em{font-size:11px}
+}
 </style>
 </head>
 <body>
