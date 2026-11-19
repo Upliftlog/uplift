@@ -486,6 +486,10 @@ nav button{min-width:0}
 .faq details>div{font-size:13.5px;line-height:1.55;color:var(--text2);padding:0 0 14px}
 .editbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--oBg);border:1px solid var(--oB);color:var(--oT);border-radius:12px;padding:10px 12px;margin:4px 0 12px;font-size:13px;font-weight:600}
 .editbar span{flex:1;min-width:150px} .editbar input{width:auto;flex:none;padding:7px 9px;font-size:14px;background:var(--panel);color:var(--text)}
+.updbar{position:fixed;left:12px;right:12px;bottom:calc(80px + env(safe-area-inset-bottom));z-index:25;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--oB);border-radius:14px;padding:11px 10px 11px 14px;box-shadow:0 10px 30px rgba(0,0,0,.35);animation:updIn .25s ease-out}
+.updbar span{flex:1;font-size:13.5px;min-width:0} .updbar small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+@keyframes updIn{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.faq ol.steps{margin:6px 0 10px;padding-left:20px} .faq ol.steps li{margin:4px 0}
 </style>
 </head>
 <body>
@@ -2633,7 +2637,7 @@ async function toggleKudo(owner,sid){
   }catch(e){ showBanner("Couldn't save kudos: "+e.message); loadFriends(); }
 }
 
-const APP={version:"1.0", build:38, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
+const APP={version:"1.0", build:39, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
 /* ================== HELP & TOUR ================== */
 const TOUR=[
   {i:"👋",t:"Welcome to UP/LIFT",b:"Log your workouts, see your progress and train alongside friends. It runs in your browser: nothing to install, no ads, and everything is saved on your phone."},
@@ -2641,6 +2645,7 @@ const TOUR=[
   {i:"✅",t:"Log as you train",b:"Type the weight and reps, then tap <b>✓</b>. The next set fills in for you and the rest timer starts. <b>RIR</b> is reps left in the tank. The 🎯 target tells you when it's time to add weight."},
   {i:"📈",t:"Watch yourself progress",b:"<b>Progress</b> shows your month on a calendar, bodyweight, working loads and running pace. Tap any lift or run to see its chart, best efforts and history."},
   {i:"✦",t:"Claude as your coach",b:"Copy a ready-made prompt into Claude and paste the reply back: get a personal plan, today's workout, feedback on a session, or turn notes and watch screenshots into logged sessions."},
+  {i:"📸",t:"Too busy to log? Screenshot it",b:"Skip the typing: on <b>Log</b> tap <b>＋ Add a past session</b> → <b>Copy for Claude</b>. Paste it into Claude, attach a screenshot from your watch or gym app (or a photo of your notebook) and send. Paste Claude's reply back, check it, and tap <b>Save to history</b>."},
   {i:"🏆",t:"Train with friends",b:"Create an account with the invite code from whoever shared the app. Your training backs up and syncs across devices, and <b>Friends</b> shows a weekly leaderboard and what everyone's been up to."},
   {i:"📲",t:"Add it to your home screen",b:"It opens full screen like an app. <b>Android (Chrome):</b> menu ⋮ → Add to Home screen. <b>iPhone (Safari):</b> Share → Add to Home Screen. You can replay this tour from the <b>?</b> button any time."}];
 function openTour(i=0){
@@ -2658,6 +2663,7 @@ function openTour(i=0){
   sh.addEventListener("touchend",e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(Math.abs(dx)>50){ const n=i+(dx<0?1:-1); if(n>=0&&n<TOUR.length) openTour(n); } });
 }
 const FAQ=[
+  ["Too lazy to log? Use a screenshot","Let Claude do the typing for you:<ol class=\"steps\"><li>On <b>Log</b>, tap <b>＋ Add a past session</b>.</li><li>Optionally jot a note in the box, e.g. <i>“legs yesterday”</i> or <i>“bench 60kg 3×8”</i>. Leave it empty if the screenshot says it all.</li><li>Tap <b>Copy for Claude</b>, then <b>Open Claude</b> and start a new chat.</li><li>Paste the prompt, then attach your screenshot(s): an Apple Watch, Garmin or Samsung Health summary, a gym app, or a photo of your notebook or whiteboard. Send.</li><li>Copy Claude's <b>whole</b> reply, including the code block, and paste it into step 2 back in the app.</li><li>Tap <b>Read reply</b>, check the date and numbers in the preview, then <b>Save to history</b>.</li></ol><b>Tips:</b> several screenshots or workouts at once is fine, as each becomes its own session. Claude uses the date on the screenshot, or today if there isn't one, and it leaves out anything it can't read rather than guessing. Pasting the same reply twice won't create duplicates, and you can fix anything afterwards with <b>✎ Edit</b>."],
   ["How do I log a workout?","On <b>Log</b>, tap a day from your program (or <b>Empty session</b>). Enter kg and reps for each set and tap ✓. When you're done, tap <b>Finish &amp; save</b>. Forgot to log? Use <b>＋ Add a past session</b> and paste your notes or a watch screenshot via Claude."],
   ["What do RIR and the 🎯 target mean?","<b>RIR</b> (reps in reserve) is how many more reps you could have done: 0 means to failure, 2 means two left. The 🎯 target is the sets × rep range and rest. Hit the top of the range on every set and the app suggests adding weight next time."],
   ["How do I change or build a program?","Tap <b>Change</b> next to your program on the Log page. Pick a starter plan, edit the one you have, build your own, or ask Claude. Programs you switch away from are kept under <b>My programs</b>."],
@@ -2669,7 +2675,7 @@ const FAQ=[
 function openHelp(){
   modal(`<div class="sheet help">
     <div class="row"><h3 class="sp">Help</h3><button class="iconbtn" data-close>✕</button></div>
-    <button class="card tourcta" id="hTour"><span class="ti">▶</span><span class="sp"><b>Take the quick tour</b><small>7 short cards · about a minute</small></span><span class="chev">›</span></button>
+    <button class="card tourcta" id="hTour"><span class="ti">▶</span><span class="sp"><b>Take the quick tour</b><small>${TOUR.length} short cards · about a minute</small></span><span class="chev">›</span></button>
     <h2>Questions</h2>
     <div class="card faq">${FAQ.map(([q,a])=>`<details><summary>${q}</summary><div>${a}</div></details>`).join("")}</div>
     <div class="vbuild">UP<i>/</i>LIFT v${APP.version}.${APP.build} · ${APP.date}</div>
@@ -2688,7 +2694,27 @@ if(signedIn()) setTimeout(()=>syncNow(),800);
 $("#helpBtn").onclick=openHelp;
 if(!LS.get("liftlog.toured",false) && !sessions.length && !signedIn()) setTimeout(()=>openTour(0),500);
 try{ navigator.storage&&navigator.storage.persist&&navigator.storage.persist(); }catch(e){}
-if("serviceWorker" in navigator && location.protocol.startsWith("http")){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+/* ---------- updates: when a new version is uploaded, offer a one-tap refresh ---------- */
+let wantReload=false;
+function showUpdateBar(worker){
+  if(document.querySelector(".updbar")) return;
+  const b=document.createElement("div"); b.className="updbar";
+  b.innerHTML=`<span>✨ <b>New version ready</b><small>${active?"Your workout in progress is saved.":"Refresh to get the latest features."}</small></span><button class="btn small primary" id="updGo">Refresh</button><button class="iconbtn" id="updX" aria-label="Later">✕</button>`;
+  document.body.appendChild(b);
+  $("#updGo").onclick=()=>{ $("#updGo").textContent="Updating…"; wantReload=true; try{ worker.postMessage("skipWaiting"); }catch(e){} setTimeout(()=>location.reload(),2500); };
+  $("#updX").onclick=()=>b.remove();
+}
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{ if(wantReload){ wantReload=false; location.reload(); } });
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    if(reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
+    reg.addEventListener("updatefound",()=>{ const nw=reg.installing; if(nw) nw.addEventListener("statechange",()=>{ if(nw.state==="installed" && navigator.serviceWorker.controller) showUpdateBar(nw); }); });
+    const check=()=>reg.update().catch(()=>{});
+    document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") check(); });
+    setInterval(check,30*60*1000);
+  }).catch(()=>{});
+}
+(()=>{ const seen=LS.get("liftlog.seenBuild",null); if(seen && seen<APP.build) setTimeout(()=>toast(`Updated to v${APP.version}.${APP.build} ✓`),700); LS.set("liftlog.seenBuild",APP.build); })();
 </script>
 </body>
 </html>

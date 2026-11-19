@@ -1,9 +1,11 @@
 // UP/LIFT offline cache. Bump VERSION whenever you upload a new index.html.
-const VERSION = "uplift-v38";
+const VERSION = "uplift-v39";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "icon.svg"];
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // first install activates straight away; updates wait until the app says "Refresh"
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => { if (!self.registration.active) return self.skipWaiting(); }));
 });
+self.addEventListener("message", e => { if (e.data === "skipWaiting") self.skipWaiting(); });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
