@@ -136,7 +136,7 @@ body.locked{overflow:hidden}
 .sheet{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .picker{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
 .pk{background:var(--bg);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;width:100%;max-width:640px;height:86vh;height:86dvh;display:flex;flex-direction:column;overflow:hidden}
-.pkcats{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;flex:none;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pkcats{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;flex:none}
 .pkcats::-webkit-scrollbar{display:none}
 .pkcats .chip{flex:none}
 .plist{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 16px 28px;touch-action:pan-y}
@@ -484,6 +484,8 @@ nav button{min-width:0}
 .faq summary::after{content:"";position:absolute;right:4px;top:50%;width:7px;height:7px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
 .faq details[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
 .faq details>div{font-size:13.5px;line-height:1.55;color:var(--text2);padding:0 0 14px}
+.editbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--oBg);border:1px solid var(--oB);color:var(--oT);border-radius:12px;padding:10px 12px;margin:4px 0 12px;font-size:13px;font-weight:600}
+.editbar span{flex:1;min-width:150px} .editbar input{width:auto;flex:none;padding:7px 9px;font-size:14px;background:var(--panel);color:var(--text)}
 </style>
 </head>
 <body>
@@ -733,6 +735,13 @@ function newSet(item, idx){
   if(item.def){ Object.assign(s,item.def); }
   return s;
 }
+function editSession(s){ // re-open a saved session in the logging screen, every set already ticked
+  active={ id:s.id, editing:true, date:s.date, startedAt:Date.now(), name:s.name, notes:s.notes||"", durationMin:s.durationMin||0, comment:s.comment||"",
+    items:(s.items||[]).map(i=>{ const it=JSON.parse(JSON.stringify(i));
+      if(it.kind==="w"){ const t=getTarget(it.name,it); it.lo=it.lo??t.lo; it.hi=it.hi??t.hi; it.rest=t.rest; it.step=t.step; }
+      it.sets=(it.sets||[]).map(x=>({...x,done:true})); return it; }) };
+  saveDraft(); show("log"); toast("Editing session");
+}
 function startSession(tpl){
   active = { id:"s"+Date.now(), date:new Date().toISOString(), startedAt:Date.now(), name:tpl.name, ...(tpl.id&&tpl.id!=="empty"&&programDays().some(d=>d.id===tpl.id)?{dayId:tpl.id, pid:getProgram().pid}:{}),
     items: tpl.items.map(i=>{ const it={name:i.name, kind:i.kind, unit:i.unit, def:i.def, ...(i.sugW?{sugW:i.sugW}:{})};
@@ -742,7 +751,7 @@ function startSession(tpl){
   saveDraft(); renderLog();
 }
 let draftTimer=null;
-function saveDraft(){ clearTimeout(draftTimer); draftTimer=setTimeout(()=>LS.set("liftlog.draft",active),300); }
+function saveDraft(){ clearTimeout(draftTimer); draftTimer=setTimeout(()=>{ if(active) LS.set("liftlog.draft",active); else LS.del("liftlog.draft"); },300); }
 
 function renderLog(){
   const el=$("#view-log");
@@ -772,18 +781,20 @@ function renderLog(){
     return;
   }
   el.innerHTML = `
+    ${active.editing?`<div class="editbar"><span>✎ Editing a saved session</span><input type="datetime-local" id="sdate" value="${(d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,16);})(active.date)}"></div>`:""}
     <div class="sessionhead">
       <input id="sname" value="${esc(active.name)}">
-      <div class="elapsed mono" id="elapsed"></div>
+      ${active.editing?"":`<div class="elapsed mono" id="elapsed"></div>`}
     </div>
     <div id="exlist">${active.items.map((it,i)=>exCard(it,i)).join("")}</div>
     <button class="btn block" style="margin-bottom:12px;padding:14px" id="addExBtn">＋ Add exercise</button>
     <div class="card">
       <textarea id="notes" placeholder="Notes: how it felt, sleep, energy, anything for the coach…">${esc(active.notes)}</textarea>
     </div>
-    <button class="btn primary block" id="finish" style="padding:15px;font-size:16px">Finish &amp; save</button>
+    <button class="btn primary block" id="finish" style="padding:15px;font-size:16px">${active.editing?"Save changes":"Finish &amp; save"}</button>
     <div style="height:10px"></div>
-    <button class="btn danger block" id="discard">Discard session</button>`;
+    <button class="btn danger block" id="discard">${active.editing?"Cancel editing":"Discard session"}</button>`;
+  const sd=$("#sdate"); if(sd) sd.onchange=()=>{ const d=new Date(sd.value); if(!isNaN(d)){ active.date=d.toISOString(); saveDraft(); } };
   $("#sname").oninput=e=>{active.name=e.target.value;saveDraft()};
   $("#notes").oninput=e=>{active.notes=e.target.value;saveDraft()};
   $("#addExBtn").onclick=()=>pickExercise({title:"Add exercise", onPick:(n,kind,unit)=>{
@@ -795,7 +806,9 @@ function renderLog(){
     for(let j=0;j<Math.max(1,Math.min(count, kind==="w"?5:8));j++) it.sets.push(newSet(it,j));
     active.items.push(it); saveDraft(); renderLog(); setTimeout(()=>document.querySelector(`[data-ex="${active.items.length-1}"]`)?.scrollIntoView({behavior:"smooth",block:"center"}),50); }});
   $("#finish").onclick=finishSession;
-  $("#discard").onclick=()=>confirmDlg("Discard this session? Nothing will be saved.","Discard",()=>{active=null;LS.del("liftlog.draft");stopRest();renderLog();});
+  $("#discard").onclick=()=>active.editing
+    ? confirmDlg("Cancel editing? Your changes won't be saved and the session stays as it was.","Cancel editing",()=>{ const id=active.id; active=null;LS.del("liftlog.draft");stopRest();renderLog(); openSession(id); })
+    : confirmDlg("Discard this session? Nothing will be saved.","Discard",()=>{active=null;LS.del("liftlog.draft");stopRest();renderLog();});
   bindEx();
   tickElapsed();
 }
@@ -1405,7 +1418,7 @@ function exCard(it,i){
   const lastTxt = last ? `Last (${fmtDate(last.session.date,{day:"numeric",month:"short"})}): <b>${lastSets.map(s=>setSummary(last.item,s)).filter(Boolean).join(", ")}</b>`
     : base ? `Baseline: <b>${esc(setSummary(it,lastSets[0])||"")}</b>` : "No previous log for this one";
   const three = it.kind==="s";
-  const prog = progressionFor(it);
+  const prog = active&&active.editing ? null : progressionFor(it);
   const tgt = it.kind==="w" ? `<button class="tgt" data-tgt="${i}">🎯 ${it.sets.length} × ${it.lo}–${it.hi} · rest ${fmtTime(it.rest)}</button>` : "";
   const advice = prog ? `<div class="adv ${prog.state}">${{up:"↑",down:"↓",hold:"=",reps:"+1",new:"★",base:"◎"}[prog.state]} ${esc(prog.msg)}</div>` : "";
   const heads = it.kind==="w" ? ["kg","reps","RIR"] : it.kind==="c" ? ["m or km","time","pace/km"] : [it.unit||"amount","kg","time"];
@@ -1414,7 +1427,7 @@ function exCard(it,i){
       <button class="iconbtn" data-up="${i}" title="Move up">↑</button>
       <button class="iconbtn" data-del="${i}" title="Remove">✕</button></div>
     ${tgt}${advice}
-    <div class="exlast">${lastTxt}</div>
+    ${active&&active.editing?"":`<div class="exlast">${lastTxt}</div>`}
     <div class="colhead ${three?"three":"four"}"><span>#</span>${heads.map(h=>`<span>${h}</span>`).join("")}<span>✓</span></div>
     <div class="sets">${it.sets.map((s,j)=>{
       const base = (prog&&prog.sug.length) ? (prog.sug[j]||prog.sug[prog.sug.length-1]) : (lastSets[j]||lastSets[lastSets.length-1]);
@@ -1474,7 +1487,7 @@ function bindEx(){
         if(!s.t && ps && s.d){ s.t=Math.round(ps*s.d/1000); const te=row.querySelector('input[data-f="t"]'); if(te) te.value=fmtTime(s.t); }
         if(pe){ const pv=pace(s.d,s.t); if(pv) pe.value=fmtTime(pv); } }
       s.done=true; row.classList.add("done"); const rc=rateCls(it,s); if(rc) row.classList.add(rc);
-      if(it.kind==="w"){ startRest(it.rest); if(rc==="top") toast(`Top of range! 💥`); }
+      if(it.kind==="w"&&!active.editing){ startRest(it.rest); if(rc==="top") toast(`Top of range! 💥`); }
       // copy this set's values into the next set (if it's still empty) so you only edit what changes
       const n=it.sets[j+1];
       if(n && !n.done && ["w","r","d","t","a","q"].every(f=>n[f]==null || (it.def&&n[f]===it.def[f]))){
@@ -1544,11 +1557,12 @@ async function finishSession(){
   // drop empty sets / items
   const items = active.items.map(it=>({name:it.name,kind:it.kind,...(it.unit?{unit:it.unit}:{}),...(it.kind==="w"&&it.lo!=null?{lo:it.lo,hi:it.hi}:{}),...(watchOf(it)?{watch:watchOf(it)}:{}),sets:it.sets.filter(s=>s.done).map(s=>{const o={done:true};["w","r","d","t","a","q"].forEach(k=>{if(s[k]!=null)o[k]=s[k]});return o;})})).filter(it=>it.sets.length);
   if(!items.length){ confirmDlg("No sets are ticked yet. Tick ✓ on the sets you completed, or discard the session.","OK",()=>{},true); return; }
-  const doc={ date:active.date, name:active.name||"Session", items, notes:active.notes||"", durationMin:Math.round((Date.now()-active.startedAt)/60000) };
+  const doc={ date:active.date, name:active.name||"Session", items, notes:active.notes||"", durationMin:active.editing?active.durationMin:Math.round((Date.now()-active.startedAt)/60000), ...(active.editing&&active.comment?{comment:active.comment}:{}) };
   const id=active.id;
   const btn=$("#finish"); btn.disabled=true; btn.textContent="Saving…";
   try{ await putSession(id,doc); }
   catch(e){ btn.disabled=false; btn.textContent="Finish & save"; showBanner(e&&e.code==="quota_exceeded" ? "Storage is full — delete some old sessions and try again." : "Couldn't save just now. Your draft is kept on this phone — try again in a moment."); return; }
+  if(active.editing){ active=null; LS.del("liftlog.draft"); stopRest(); toast("Changes saved ✓"); renderLog(); openSession(id); return; }
   const planned=active; const change=dayChanges(planned);
   active=null; LS.del("liftlog.draft"); stopRest(); toast("Session saved 💪");
   renderLog();
@@ -1841,11 +1855,12 @@ function openSession(id, autoCoach=false){
     ${s.notes?`<div class="card" style="margin-top:12px"><div class="muted" style="font-size:12px;margin-bottom:4px">NOTES</div>${esc(s.notes)}</div>`:""}
     <div id="coachBox">${coachHtml(s)}</div>
     <div class="row" style="margin-top:16px;gap:10px">
-      <button class="btn small" id="repeatBtn">Repeat</button><button class="btn small" id="toProgBtn">＋ Add to program</button><span class="sp"></span>
+      <button class="btn small" id="editBtn">✎ Edit</button><button class="btn small" id="repeatBtn">Repeat</button><button class="btn small" id="toProgBtn">＋ Add to program</button><span class="sp"></span>
       <button class="btn small danger" id="delBtn">Delete</button>
     </div></div>`);
   bindCoach(s);
   $("#toProgBtn").onclick=()=>askSaveAsDay(s.name, s.items, null, true);
+  $("#editBtn").onclick=()=>{ closeModal(); if(active&&!active.editing){ confirmDlg("You have a session in progress. Finish or discard it before editing an old one.","OK",()=>show("log"),true); return; } editSession(s); };
   $("#repeatBtn").onclick=()=>{ closeModal(); if(active){ confirmDlg("You already have a session in progress. Replace it?","Replace",()=>repeat(s)); } else repeat(s); };
   $("#delBtn").onclick=()=>confirmDlg("Delete this session for good?","Delete",async()=>{ try{ await delSession(s.id); closeModal(); toast("Deleted"); show(view);}catch(e){ showBanner("Couldn't delete right now."); } });
   if(autoCoach && sampleFn && !s.comment) runCoach(s);
@@ -2618,7 +2633,7 @@ async function toggleKudo(owner,sid){
   }catch(e){ showBanner("Couldn't save kudos: "+e.message); loadFriends(); }
 }
 
-const APP={version:"1.0", build:37, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
+const APP={version:"1.0", build:38, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
 /* ================== HELP & TOUR ================== */
 const TOUR=[
   {i:"👋",t:"Welcome to UP/LIFT",b:"Log your workouts, see your progress and train alongside friends. It runs in your browser: nothing to install, no ads, and everything is saved on your phone."},
