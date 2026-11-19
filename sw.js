@@ -1,5 +1,5 @@
 // UP/LIFT offline cache. Bump VERSION whenever you upload a new index.html.
-const VERSION = "uplift-v27";
+const VERSION = "uplift-v28";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "icon.svg"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

@@ -420,6 +420,28 @@ button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
 .anote{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.4}
 .aswitch{margin-top:auto;padding-top:24px;text-align:center;font-size:14px;color:var(--muted)}
 .aswitch .lnk{color:var(--accent);font-weight:700;margin-left:4px}
+nav button{min-width:0}
+.fr-empty{text-align:center;padding:26px 18px} .fr-empty .big{font-size:34px} .fr-empty b{display:block;font-size:17px;margin:6px 0 4px} .fr-empty .muted{font-size:13.5px;line-height:1.45}
+.lb{padding:12px 12px 6px} .lbseg{margin-bottom:8px} .lbseg button{font-size:12px;padding:8px 2px}
+.lbr{display:flex;align-items:center;gap:10px;padding:9px 4px;border-radius:12px}
+.lbr.me{background:var(--soft);box-shadow:inset 0 0 0 1px var(--oB)}
+.lbr .md{width:26px;text-align:center;font-size:19px;flex:none} .lbr .rk{font-size:13px;font-weight:700;color:var(--muted)}
+.lbr b{font-size:14px} .you{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-left:4px}
+.lbr .bar{height:5px;border-radius:3px;background:var(--panel2);margin-top:5px;overflow:hidden} .lbr .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.lbr .v{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:14px;white-space:nowrap}
+.av{width:34px;height:34px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none;color:var(--text)}
+.lbr.me .av{background:var(--accent);color:#141414;border-color:var(--accent)}
+.lbl{font-size:12px;color:var(--muted);padding:10px 4px 6px;border-top:1px solid var(--line);margin-top:6px}
+.fi{display:flex;gap:11px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px 12px 12px 14px;margin-bottom:10px;position:relative;overflow:hidden}
+.fi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)} .fi.cardio::before{background:var(--blue)} .fi.mix::before{background:linear-gradient(var(--accent) 50%,var(--blue) 50%)}
+.fh{display:flex;justify-content:space-between;gap:8px;font-size:13.5px} .fh .muted{font-size:12px;white-space:nowrap}
+.ft{font-size:14px;margin-top:1px;color:var(--text2)} .ft b{color:var(--text)}
+.fc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px} .fc span{font-size:12px;font-weight:600;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 9px;font-family:"JetBrains Mono",monospace}
+.fhl{font-size:12.5px;color:var(--text2);margin-top:7px}
+.kd{flex:none;align-self:center;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:7px 10px;font-size:15px;filter:grayscale(1);opacity:.75;color:var(--text)}
+.kd span{font-size:12px;font-weight:700;margin-left:3px} .kd.on{filter:none;opacity:1;border-color:var(--oB);background:var(--oBg)} .kd:disabled{opacity:.5}
+.sharerow{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px}
+.sharerow span{flex:1} .sharerow small{display:block;margin-top:2px} .sharerow input{width:22px;height:22px;accent-color:var(--accent);flex:none}
 </style>
 </head>
 <body>
@@ -432,6 +454,7 @@ button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
   <div id="banner" class="banner hidden"></div>
   <section id="view-log"></section>
   <section id="view-progress" class="hidden"></section>
+  <section id="view-friends" class="hidden"></section>
   <section id="view-baseline" class="hidden"></section>
 </main>
 
@@ -447,6 +470,7 @@ button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
 <nav>
   <button data-v="log" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9.5v5M21 9.5v5M6.5 12h11"/></svg>Log</button>
   <button data-v="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Progress</button>
+  <button data-v="friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 19a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.2A5 5 0 0 1 21 19"/></svg>Friends</button>
   <button data-v="baseline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Profile</button>
 </nav>
 
@@ -657,7 +681,8 @@ renderCountdown();
 let view="log";
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.v));
 function show(v){ view=v; document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
-  ["log","progress","baseline"].forEach(x=>$("#view-"+x).classList.toggle("hidden",x!==v));
+  ["log","progress","friends","baseline"].forEach(x=>$("#view-"+x).classList.toggle("hidden",x!==v));
+  if(v==="friends"){ renderFriends(); const c=friendsCache; if(!c||Date.now()-new Date(c.at)>30000) loadFriends(); }
   if(v==="baseline") renderBaseline(); if(v==="progress") renderProgress(); if(v==="log") renderLog(); window.scrollTo(0,0); }
 
 /* ================== LOG VIEW ================== */
@@ -2291,12 +2316,14 @@ async function push(meta){
   const cur=localItems(), uid=getAuth().user.id, rows=[], hashes={};
   Object.entries(cur).forEach(([k,v])=>{ const h=hashStr(JSON.stringify(v)); if(meta.hash[k]!==h){ const [kind,...rest]=k.split(":"); rows.push({user_id:uid,kind,id:rest.join(":"),data:v,deleted:false}); hashes[k]=h; } });
   Object.keys(meta.hash).forEach(k=>{ if(cur[k]===undefined){ const [kind,...rest]=k.split(":"); rows.push({user_id:uid,kind,id:rest.join(":"),data:null,deleted:true}); hashes[k]=null; } });
+  const feedChanged=rows.filter(r=>r.kind==="session"&&!r.deleted).map(r=>r.id), feedGone=rows.filter(r=>r.kind==="session"&&r.deleted).map(r=>r.id);
   for(let i=0;i<rows.length;i+=200){
     const chunk=rows.slice(i,i+200);
     await api("/rest/v1/user_items?on_conflict=user_id,kind,id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(chunk)});
     chunk.forEach(r=>{ const k=r.kind+":"+r.id; if(hashes[k]===null) delete meta.hash[k]; else meta.hash[k]=hashes[k]; });
     saveMeta(meta);
   }
+  if(feedChanged.length||feedGone.length||!meta.feedShared||meta.feedVer!==1||(!shareOn()&&meta.feedShared)){ await publishFeed(meta,feedChanged,feedGone); saveMeta(meta); }
   return rows.length;
 }
 async function syncNow(opts={}){
@@ -2334,6 +2361,7 @@ function accountHtml(){
     <div class="row" style="gap:10px"><div class="avatar">${esc((a.username||"?").slice(0,1).toUpperCase())}</div>
       <div class="sp"><b>@${esc(a.username||"you")}</b><small id="syncLine"></small></div>
       <button class="btn small" id="syncNowBtn">Sync now</button></div>
+    <label class="sharerow"><span><b>Share my sessions with friends</b><small>Leaderboard and feed: name, time, tons/km and one highlight</small></span><input type="checkbox" id="shareTog" ${shareOn()?"checked":""}></label>
     <div class="row" style="gap:14px;margin-top:12px;font-size:13px"><button class="lnk" id="signOutBtn">Sign out</button><button class="lnk danger" id="delCloudBtn">Delete my cloud data</button></div></div>`;
 }
 function bindAccount(){
@@ -2341,6 +2369,7 @@ function bindAccount(){
   const s=$("#syncNowBtn"); if(s) s.onclick=()=>syncNow({toast:true});
   const o=$("#signOutBtn"); if(o) o.onclick=signOutFlow;
   const d=$("#delCloudBtn"); if(d) d.onclick=deleteCloudFlow;
+  const sh=$("#shareTog"); if(sh) sh.onchange=()=>{ const p=getProfile(); p.shareFeed=sh.checked; LS.set("liftlog.profile",p); toast(sh.checked?"Sharing with friends":"Sessions hidden from friends"); syncNow(); };
   paintSync();
 }
 function openAuthSheet(mode="login"){
@@ -2398,6 +2427,7 @@ function openAuthSheet(mode="login"){
   document.querySelectorAll(".sheet input").forEach(i=>i.onkeydown=e=>{ if(e.key==="Enter") submit(); });
 }
 function clearAccountLocal(keepData){
+  localStorage.removeItem("liftlog.friendsCache");
   if(!keepData){ ["sessions","weights",...SYNC_SETTINGS,"draft","sampleBackup","lastBackup"].forEach(k=>localStorage.removeItem("liftlog."+k)); }
   ["auth","syncMeta"].forEach(k=>localStorage.removeItem("liftlog."+k));
   location.href=location.pathname;
@@ -2417,6 +2447,113 @@ function deleteCloudFlow(){
 }
 window.addEventListener("online",()=>scheduleSync(500));
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"){ const m=syncMeta(); if(!m.lastSync||Date.now()-new Date(m.lastSync)>60000) scheduleSync(300); } });
+
+/* ================== FRIENDS: weekly leaderboard + activity feed ==================
+   Everyone who signed up is a friend. Each person publishes a short summary per session to public.feed
+   (title, time, tons/km, one highlight) — never notes, weigh-ins or full workouts. Sample sessions are never shared. */
+let lbMetric="sessions", friendsCache=LS.get("liftlog.friendsCache",null), friendsLoading=false, friendsErr="";
+const shareOn=()=>getProfile().shareFeed!==false;
+function weekStart(d=new Date()){ const x=new Date(d); x.setHours(0,0,0,0); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+function sessionHighlight(s){
+  let best=null;
+  (s.items||[]).forEach(it=>{ if(it.kind!=="w") return; (it.sets||[]).forEach(x=>{ if(x.done===false) return; const v=x.w?e1rm(x.w,x.r||1):(x.r||0)/100;
+    if(!best||v>best.v) best={v,t:x.w?`${it.name} ${x.w} kg × ${x.r??"?"}`:`${it.name} × ${x.r??"?"}`}; }); });
+  if(best) return best.t;
+  let run=null; (s.items||[]).forEach(it=>{ if(it.kind!=="c") return; let d=0,t=0; (it.sets||[]).forEach(x=>{ if(x.done!==false&&x.d){ d+=x.d; t+=x.t||0; } }); if(d&&(!run||d>run.d)) run={d,t,n:it.name}; });
+  if(run) return `${run.n} ${kmTxt(run.d)}${run.t?` @ ${fmtTime(Math.round(run.t/(run.d/1000)))}/km`:""}`;
+  const st=(s.items||[]).find(it=>it.kind==="s"); return st?st.name:"";
+}
+function feedRow(s,uid){
+  const t=sessionStats(s);
+  return {user_id:uid,session_id:s.id,started_at:s.date,title:String(s.name||"Session").slice(0,40),kind:t.hasW&&t.hasC?"mix":t.hasC?"cardio":"strength",
+    minutes:t.min?Math.round(t.min):null,kg:t.kg?Math.round(t.kg):null,km:t.km?+t.km.toFixed(2):null,pace_s:t.pace?Math.round(t.pace):null,sets:t.sets||null,highlight:sessionHighlight(s).slice(0,80)};
+}
+async function publishFeed(meta,changedIds,deletedIds){ // called from push(); never breaks sync if it fails
+  try{
+    const uid=getAuth().user.id;
+    if(!shareOn()){ if(meta.feedShared){ await api(`/rest/v1/feed?user_id=eq.${uid}`,{method:"DELETE"}); meta.feedShared=false; } return; }
+    let ids=changedIds;
+    if(!meta.feedShared||meta.feedVer!==1){ ids=sessions.map(s=>s.id); }
+    const rows=sessions.filter(s=>ids.includes(s.id)&&!String(s.id).startsWith("demo_")).map(s=>feedRow(s,uid));
+    for(let i=0;i<rows.length;i+=200) await api("/rest/v1/feed?on_conflict=user_id,session_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(rows.slice(i,i+200))});
+    const gone=deletedIds.concat(sessions.filter(s=>String(s.id).startsWith("demo_")&&ids.includes(s.id)).map(s=>s.id));
+    if(gone.length) await api(`/rest/v1/feed?user_id=eq.${uid}&session_id=in.(${gone.map(x=>`"${x}"`).join(",")})`,{method:"DELETE"});
+    meta.feedShared=true; meta.feedVer=1;
+  }catch(e){ console.warn("feed",e); }
+}
+async function loadFriends(){
+  if(!signedIn()||friendsLoading) return; friendsLoading=true; friendsErr="";
+  try{
+    const ws=weekStart(), lw=new Date(ws); lw.setDate(lw.getDate()-7);
+    const cols="user_id,session_id,username,started_at,title,kind,minutes,kg,km,pace_s,sets,highlight";
+    const [feed,week]=await Promise.all([
+      api(`/rest/v1/feed?select=${cols}&order=started_at.desc&limit=30`).then(r=>r.json()),
+      api(`/rest/v1/feed?select=user_id,username,started_at,kind,minutes,kg,km&started_at=gte.${encodeURIComponent(lw.toISOString())}&limit=2000`).then(r=>r.json())]);
+    let kudos=[]; if(feed.length){ const ids=[...new Set(feed.map(f=>f.session_id))]; kudos=await api(`/rest/v1/kudos?select=user_id,owner_id,session_id&session_id=in.(${ids.map(x=>`"${x}"`).join(",")})`).then(r=>r.json()); }
+    friendsCache={feed,week,kudos,at:new Date().toISOString()}; LS.set("liftlog.friendsCache",friendsCache);
+  }catch(e){ friendsErr = e.message==="offline"?"You're offline: showing what was loaded last.":/relation|does not exist|404|schema cache/i.test(e.message)?"Friends isn't set up in the database yet (run the Friends script in Supabase).":"Couldn't load friends: "+e.message; }
+  finally{ friendsLoading=false; if(view==="friends") renderFriends(); }
+}
+function lbRows(week,from,to){
+  const m={};
+  week.forEach(r=>{ const d=new Date(r.started_at); if(d<from||(to&&d>=to)) return; const k=r.user_id; const o=m[k]||(m[k]={uid:k,name:r.username||"friend",sessions:0,kg:0,km:0,minutes:0});
+    o.sessions++; o.kg+=+r.kg||0; o.km+=+r.km||0; o.minutes+=+r.minutes||0; });
+  return Object.values(m);
+}
+const LBM={sessions:{l:"Sessions",f:v=>v,u:""},kg:{l:"Lifted",f:v=>kgParts(v).join(" "),u:""},km:{l:"Distance",f:v=>v.toFixed(1),u:" km"},minutes:{l:"Time",f:v=>v>=100?Math.floor(v/60)+"h "+String(Math.round(v%60)).padStart(2,"0"):Math.round(v),u:" min"}};
+function renderFriends(){
+  const el=$("#view-friends");
+  if(!signedIn()){ el.innerHTML=`<h2>Friends</h2><div class="card fr-empty"><div class="big">🏆</div><b>Train with your friends</b>
+    <div class="muted">See a weekly leaderboard and what everyone's been up to. Sign in or create an account to join.</div>
+    <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn small primary" data-auth="signup">Create account</button><button class="btn small" data-auth="login">Sign in</button></div></div>`;
+    el.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth)); return; }
+  const me=getAuth().user.id, C=friendsCache||{feed:[],week:[],kudos:[]};
+  const ws=weekStart(), we=new Date(ws); we.setDate(we.getDate()+7); const lw=new Date(ws); lw.setDate(lw.getDate()-7);
+  const rows=lbRows(C.week,ws,null).sort((a,b)=>b[lbMetric]-a[lbMetric]||b.sessions-a.sessions);
+  const last=lbRows(C.week,lw,ws).sort((a,b)=>b[lbMetric]-a[lbMetric])[0];
+  const daysLeft=Math.ceil((we-new Date())/86400000), M=LBM[lbMetric];
+  const medal=i=>["🥇","🥈","🥉"][i]||`<span class="rk">${i+1}</span>`;
+  const max=Math.max(1,...rows.map(r=>r[lbMetric]));
+  const kc=(o,s)=>C.kudos.filter(k=>k.owner_id===o&&k.session_id===s), mine=(o,s)=>kc(o,s).some(k=>k.user_id===me);
+  el.innerHTML=`
+    <div class="row" style="margin:6px 2px 10px;align-items:flex-end"><h2 class="sp" style="margin:0">This week</h2><span class="muted" style="font-size:12px">${fmtDate(ws,{day:"numeric",month:"short"})} – ${fmtDate(new Date(we-1),{day:"numeric",month:"short"})} · resets in ${daysLeft} day${daysLeft===1?"":"s"}</span></div>
+    <div class="card lb">
+      <div class="seg lbseg">${Object.entries(LBM).map(([k,v])=>`<button data-lbm="${k}" class="${k===lbMetric?"on":""}">${v.l}</button>`).join("")}</div>
+      ${rows.length?rows.map((r,i)=>`<div class="lbr ${r.uid===me?"me":""}"><div class="md">${medal(i)}</div><div class="av">${esc(r.name.slice(0,1).toUpperCase())}</div>
+        <div class="sp"><b>@${esc(r.name)}${r.uid===me?' <span class="you">you</span>':""}</b><div class="bar"><i style="width:${Math.max(4,r[lbMetric]/max*100)}%"></i></div></div>
+        <div class="v">${M.f(r[lbMetric])}${M.u}</div></div>`).join("")
+      :`<div class="muted" style="font-size:13px;padding:14px 4px;text-align:center">Nobody's trained yet this week. Be the first on the board 💪</div>`}
+      ${last?`<div class="lbl">Last week's ${M.l.toLowerCase()} leader: <b>@${esc(last.name)}</b> · ${M.f(last[lbMetric])}${M.u}</div>`:""}
+    </div>
+    <div class="row" style="margin:20px 2px 10px;align-items:center"><h2 class="sp" style="margin:0">Activity</h2><button class="lnk" id="frRefresh" style="font-size:13px">${friendsLoading?"Loading…":"↻ Refresh"}</button></div>
+    ${friendsErr?`<div class="banner">${esc(friendsErr)}</div>`:""}
+    ${!shareOn()?`<div class="banner">You're not sharing your sessions, so friends can't see yours. Turn it on in Profile → Account.</div>`:""}
+    ${C.feed.length?C.feed.map(f=>{ const k=kc(f.user_id,f.session_id).length, my=mine(f.user_id,f.session_id), self=f.user_id===me;
+      const chips=[f.minutes&&`${f.minutes>=100?Math.floor(f.minutes/60)+"h "+String(f.minutes%60).padStart(2,"0"):f.minutes+" min"}`, f.kg&&kgParts(+f.kg).join(" "), f.km&&`${(+f.km).toFixed(1)} km`, f.pace_s&&!f.kg&&`${fmtTime(f.pace_s)}/km`].filter(Boolean);
+      return `<div class="fi ${f.kind}"><div class="av">${esc((f.username||"?").slice(0,1).toUpperCase())}</div>
+        <div class="sp"><div class="fh"><b>@${esc(f.username||"friend")}</b><span class="muted">${agoText(f.started_at)}</span></div>
+          <div class="ft">finished <b>${esc(f.title)}</b></div>
+          ${chips.length?`<div class="fc">${chips.map(c=>`<span>${esc(c)}</span>`).join("")}</div>`:""}
+          ${f.highlight&&f.kind!=="cardio"?`<div class="fhl">★ ${esc(f.highlight)}</div>`:""}
+        </div>
+        <button class="kd ${my?"on":""}" data-kudo="${f.user_id}|${esc(f.session_id)}" ${self?"disabled":""} title="${self?"Your session":"Give kudos"}">🔥${k?`<span>${k}</span>`:""}</button></div>`; }).join("")
+    :`<div class="card muted" style="font-size:13px;text-align:center;padding:20px">No activity yet. Finished sessions from everyone in the group show up here.</div>`}
+    <div class="muted" style="font-size:11.5px;line-height:1.45;margin:14px 4px 0">Friends see each session's name, time, tons or km and one highlight, never your notes, weigh-ins or full workouts. ${C.at?`Updated ${agoText(C.at)}.`:""}</div>`;
+  el.querySelectorAll("[data-lbm]").forEach(b=>b.onclick=()=>{ lbMetric=b.dataset.lbm; renderFriends(); });
+  const rf=$("#frRefresh"); if(rf) rf.onclick=()=>{ loadFriends(); renderFriends(); };
+  el.querySelectorAll("[data-kudo]").forEach(b=>b.onclick=()=>toggleKudo(...b.dataset.kudo.split("|")));
+}
+async function toggleKudo(owner,sid){
+  const me=getAuth().user.id, C=friendsCache; if(!C) return;
+  const had=C.kudos.some(k=>k.user_id===me&&k.owner_id===owner&&k.session_id===sid);
+  C.kudos = had ? C.kudos.filter(k=>!(k.user_id===me&&k.owner_id===owner&&k.session_id===sid)) : C.kudos.concat({user_id:me,owner_id:owner,session_id:sid});
+  renderFriends();
+  try{
+    if(had) await api(`/rest/v1/kudos?user_id=eq.${me}&owner_id=eq.${owner}&session_id=eq.${encodeURIComponent(sid)}`,{method:"DELETE"});
+    else await api("/rest/v1/kudos",{method:"POST",headers:{Prefer:"return=minimal,resolution=ignore-duplicates"},body:JSON.stringify([{user_id:me,owner_id:owner,session_id:sid}])});
+    LS.set("liftlog.friendsCache",C);
+  }catch(e){ showBanner("Couldn't save kudos: "+e.message); loadFriends(); }
+}
 
 /* ================== BOOT ================== */
 active = LS.get("liftlog.draft", null);
