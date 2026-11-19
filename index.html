@@ -401,6 +401,25 @@ button,a,input,select,summary{-webkit-tap-highlight-color:transparent}
 .lnk{background:none;border:0;padding:0;color:var(--text2);font:inherit;font-weight:600;cursor:pointer}
 .fl{display:block;margin-bottom:12px} .fl>span{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
 .pw{position:relative} .pw input{padding-right:62px} .pw .lnk{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:13px}
+.sheet.auth{max-width:none;height:100%;max-height:100dvh;border-radius:0;border:0;display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top)) 22px calc(22px + env(safe-area-inset-bottom));
+  background:radial-gradient(120% 55% at 50% -8%,rgba(255,122,26,.22),transparent 60%),var(--bg);position:relative}
+.sheet.auth .aclose{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px}
+.ahero{text-align:center;margin:clamp(18px,7vh,64px) 0 26px}
+.ahero svg{width:64px;height:64px;filter:drop-shadow(0 6px 18px rgba(255,122,26,.35))}
+.abrand{font-weight:800;font-size:15px;letter-spacing:2px;margin-top:6px;color:var(--text2)} .abrand i{font-style:normal;color:var(--accent)}
+.ahero h3{font-size:27px;margin:18px 0 6px;letter-spacing:-.3px} .ahero p{margin:0 auto;max-width:300px;color:var(--muted);font-size:14.5px;line-height:1.45}
+.aform{width:100%;max-width:420px;margin:0 auto}
+.af{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 14px;margin-bottom:12px;transition:border-color .15s,box-shadow .15s}
+.af:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,122,26,.15)}
+.af svg{width:20px;height:20px;color:var(--muted);flex:none}
+.af input{border:0;background:transparent;padding:16px 0;flex:1;min-width:0;box-shadow:none;outline:none}
+.af input:focus{border:0}
+.af .lnk{font-size:13px;color:var(--muted)}
+.ahint{font-size:12px;line-height:1.45;color:var(--muted);margin:-2px 2px 12px}
+.abtn{padding:15px;font-size:16px;border-radius:14px;margin-top:4px}
+.anote{font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.4}
+.aswitch{margin-top:auto;padding-top:24px;text-align:center;font-size:14px;color:var(--muted)}
+.aswitch .lnk{color:var(--accent);font-weight:700;margin-left:4px}
 </style>
 </head>
 <body>
@@ -2325,17 +2344,25 @@ function bindAccount(){
   paintSync();
 }
 function openAuthSheet(mode="login"){
-  const signup=mode==="signup";
-  modal(`<div class="sheet">
-    <div class="row"><h3 class="sp">${signup?"Create account":"Sign in"}</h3><button class="iconbtn" data-close>✕</button></div>
-    <div class="seg" style="margin:6px 0 14px"><button data-am="login" class="${signup?"":"on"}">Sign in</button><button data-am="signup" class="${signup?"on":""}">Create account</button></div>
-    <label class="fl"><span>Username</span><input id="auUser" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="e.g. alex_lifts"></label>
-    <label class="fl"><span>Password</span><div class="pw"><input id="auPass" type="password" autocomplete="${signup?"new-password":"current-password"}" placeholder="${signup?"At least 8 characters":""}"><button type="button" class="lnk" id="auShow">Show</button></div></label>
-    ${signup?`<label class="fl"><span>Invite code</span><input id="auCode" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="From whoever shared the app"></label>
-    <div class="muted" style="font-size:12px;line-height:1.45;margin:2px 0 10px">Usernames: 3–20 letters, numbers, dots, dashes or underscores. There's no email, so <b>remember your password</b>: if you forget it, ask the person who runs the app to reset it.${(sessions.length||LS.get("liftlog.profile",null))?"<br>What's already on this device will be added to your new account.":""}</div>`
-    :`<div class="muted" style="font-size:12px;margin:2px 0 10px">${sessions.length?"Anything on this device that isn't in your account yet will be added to it.":"Your sessions, programs and profile will download to this device."}</div>`}
-    <div id="auErr"></div>
-    <button class="btn primary block" id="auGo" style="padding:13px">${signup?"Create account":"Sign in"}</button>
+  const signup=mode==="signup", mark=(document.querySelector(".brand svg")||{}).outerHTML||"";
+  const I={user:'<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/>',lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',ticket:'<path d="M4 8a2 2 0 0 0 2-2h12a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H6a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4Z"/><path d="M10 9v6" stroke-dasharray="1.5 2"/>'};
+  const ic=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
+  const hasLocal=sessions.length||LS.get("liftlog.profile",null);
+  modal(`<div class="sheet auth">
+    <button class="iconbtn aclose" data-close aria-label="Close">✕</button>
+    <div class="ahero">${mark}<div class="abrand">UP<i>/</i>LIFT</div>
+      <h3>${signup?"Create your account":"Welcome back"}</h3>
+      <p>${signup?"Back up your training and use it on any phone or computer.":"Sign in to sync your training across devices."}</p></div>
+    <div class="aform">
+      <label class="af">${ic("user")}<input id="auUser" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Username"></label>
+      <label class="af">${ic("lock")}<input id="auPass" type="password" autocomplete="${signup?"new-password":"current-password"}" placeholder="Password"><button type="button" class="lnk" id="auShow">Show</button></label>
+      ${signup?`<label class="af">${ic("ticket")}<input id="auCode" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Invite code"></label>
+      <div class="ahint">Username: 3–20 letters, numbers, dots, dashes or underscores. Password: at least 8 characters. There's no email reset, so <b>remember your password</b>.</div>`:""}
+      <div id="auErr"></div>
+      <button class="btn primary block abtn" id="auGo">${signup?"Create account":"Sign in"}</button>
+      <div class="anote">${signup?(hasLocal?"What's already on this device will be added to your account.":"Got the invite code from a friend? You're set."):(sessions.length?"Anything here that isn't in your account yet will be added to it.":"Your sessions, programs and profile will download to this device.")}</div>
+    </div>
+    <div class="aswitch">${signup?`Already have an account? <button class="lnk" data-am="login">Sign in</button>`:`New to UP/LIFT? <button class="lnk" data-am="signup">Create an account</button>`}</div>
   </div>`);
   document.querySelectorAll("[data-am]").forEach(b=>b.onclick=()=>{ const u=$("#auUser").value; openAuthSheet(b.dataset.am); $("#auUser").value=u; });
   $("#auShow").onclick=()=>{ const p=$("#auPass"); p.type=p.type==="password"?"text":"password"; $("#auShow").textContent=p.type==="password"?"Show":"Hide"; };
@@ -2369,7 +2396,6 @@ function openAuthSheet(mode="login"){
   };
   go.onclick=submit;
   document.querySelectorAll(".sheet input").forEach(i=>i.onkeydown=e=>{ if(e.key==="Enter") submit(); });
-  setTimeout(()=>$("#auUser").focus(),50);
 }
 function clearAccountLocal(keepData){
   if(!keepData){ ["sessions","weights",...SYNC_SETTINGS,"draft","sampleBackup","lastBackup"].forEach(k=>localStorage.removeItem("liftlog."+k)); }
