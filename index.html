@@ -490,6 +490,30 @@ nav button{min-width:0}
 .updbar span{flex:1;font-size:13.5px;min-width:0} .updbar small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
 @keyframes updIn{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
 .faq ol.steps{margin:6px 0 10px;padding-left:20px} .faq ol.steps li{margin:4px 0}
+.nubtn{display:flex;align-items:center;gap:6px;width:100%;text-align:left;background:var(--oBg);border:1px solid var(--oB);color:var(--oT);border-radius:12px;padding:10px 12px;margin:0 0 10px;font-size:13.5px}
+.nubtn b{color:var(--text)} .nubtn .chev{margin-left:auto}
+.nutag,.ntag{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent)}
+.tpl{position:relative} .tpl.isnext{border-color:var(--accent)} .ntag{position:absolute;top:8px;right:10px}
+.nuhint{font-size:12.5px;color:var(--muted);margin:0 2px 10px}
+.nuopt{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:8px;color:var(--text)}
+.nuopt b{display:block;font-size:14.5px} .nuopt small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.nuopt .rd{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none} .nuopt.on{border-color:var(--accent);background:var(--oBg)} .nuopt.on .rd{border:6px solid var(--accent)}
+.nuweek{display:grid;grid-template-columns:1fr;gap:6px} .nuweek label{display:flex;align-items:center;gap:10px} .nuweek span{width:38px;font-weight:600;font-size:13.5px;color:var(--text2)} .nuweek select{flex:1}
+.av.hasem{border-color:transparent;font-size:18px;font-weight:400}
+.fr .av.hasem{font-size:17px}
+.lbr.me .av.hasem{border:2px solid var(--accent)}
+.avbtn{position:relative;background:none;border:0;padding:0;flex:none}
+.avbtn span{position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.av.avmid{width:40px;height:40px;font-size:16px} .av.avmid.hasem{font-size:21px}
+.avprev{display:flex;justify-content:center;margin:6px 0 12px}
+.av.avbig{width:84px;height:84px;font-size:34px} .av.avbig.hasem{font-size:44px}
+.avcols{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.avc{width:32px;height:32px;border-radius:50%;border:2px solid transparent;padding:0} .avc.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
+.avh{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:14px 2px 6px}
+.avgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.ave{height:44px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:22px;padding:0;color:var(--text)}
+.ave.on{border:2px solid var(--accent);background:var(--oBg)}
+.ave.letter{font-size:13px;font-weight:600}
 </style>
 </head>
 <body>
@@ -765,13 +789,15 @@ function renderLog(){
       ${welcomeHtml()}
       ${getProgram() ? `
       <div class="row" style="margin:18px 2px 10px"><h2 class="sp" style="margin:0">${esc(getProgram().name)}</h2><button class="btn small" data-prog>Change</button></div>
-      <div class="tplgrid">${tpls().map(t=>`<button class="tpl ${isCardioDay(t)?"hy":""}" data-t="${t.id}"><b>${esc(t.name)}</b><small>${esc(t.desc||t.items.map(i=>i.name).slice(0,3).join(" · "))}</small></button>`).join("")}</div>
+      ${nextUpHtml()}
+      <div class="tplgrid">${tpls().map(t=>`<button class="tpl ${isCardioDay(t)?"hy":""} ${nextUpInfo()&&nextUpInfo().day.id===t.id?"isnext":""}" data-t="${t.id}">${nextUpInfo()&&nextUpInfo().day.id===t.id?'<span class="ntag">Next</span>':""}<b>${esc(t.name)}</b><small>${esc(t.desc||t.items.map(i=>i.name).slice(0,3).join(" · "))}</small></button>`).join("")}</div>
       <button class="btn block" style="margin-top:10px" data-today>✦ Today's workout from Claude</button>` : chooserHtml()}
       <button class="btn block" style="margin-top:8px" data-addpast>＋ Add a past session</button>
       ${(getProgram() && !sessions.length && !Object.keys(LS.get("liftlog.baseline",{})).length) ? `<button class="card" data-gobase style="display:block;width:100%;text-align:left;margin-top:12px;border-color:var(--oB)"><b style="color:var(--text)">◎ Set up your profile first</b><div class="muted" style="font-size:13px;margin-top:4px;line-height:1.4">Add your details for daily calories, and your current weights so your first workout comes pre-filled.</div></button>` : ""}
       ${historyHtml()}`;
-    el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>startSession(tpls().find(t=>t.id===b.dataset.t)));
+    el.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ const n=nextUpInfo(); startSession(tpls().find(t=>t.id===b.dataset.t)); if(n&&n.how==="pick"&&n.day.id===b.dataset.t&&active){ active.oneOff=true; saveDraft(); } });
     el.querySelectorAll("[data-prog]").forEach(b=>b.onclick=openProgramSheet);
+    el.querySelectorAll("[data-nextup]").forEach(b=>b.onclick=()=>openNextUp());
     el.querySelectorAll("[data-today]").forEach(b=>b.onclick=openTodaySheet);
     el.querySelectorAll("[data-addpast]").forEach(b=>b.onclick=openAddPastSheet);
     el.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth));
@@ -867,8 +893,7 @@ function welcomeHtml(){
   const thisWeek=sessions.filter(s=>new Date(s.date).getTime()>=ws);
   const vol=thisWeek.reduce((t,s)=>t+sessionVolume(s).v,0);
   const last=sessions[0], streak=weekStreak();
-  const days=programDays(); let next="";
-  if(days.length>1){ const lp=sessions.find(s=>days.some(d=>d.name===s.name)); if(lp){ const k=days.findIndex(d=>d.name===lp.name); next=days[(k+1)%days.length].name; } }
+
   const lastB=LS.get("liftlog.lastBackup",null);
   const needBackup = !signedIn() && sessions.length>=5 && (!lastB || Date.now()-new Date(lastB)>21*86400000);
   const msg = thisWeek.length===0 ? "New week, fresh start. Let's get one in." : thisWeek.length>=3 ? "Strong week so far, keep it rolling." : "Nice work this week.";
@@ -876,10 +901,76 @@ function welcomeHtml(){
     <div class="wh">${part}${name?`, ${esc(name)}`:""}</div>
     <div class="ws">Welcome back. ${msg}</div>
     <div class="wstats">${[blockStat(), liftedStat(), distanceStat()].map(t=>`<div><span class="wk">${t.k}</span><b>${esc(t.v)}${t.u?`<span class="u">${esc(t.u)}</span>`:""}</b><small>${esc(t.l)}</small><em>${esc(t.s)}</em></div>`).join("")}</div>
-    <div class="wlast">Last: <b>${esc(last.name)}</b> · ${agoText(last.date)}${next?` &nbsp;→&nbsp; Next up: <b class="acc">${esc(next)}</b>`:""}</div>
+    <div class="wlast">Last: <b>${esc(last.name)}</b> · ${agoText(last.date)}</div>
     ${needBackup?`<button class="wbk" data-gobackup>💾 It's been a while since your last backup. Back up now ›</button>`:""}
   </div>`;
 }
+/* ---------- Next up: follow order, one-off pick, or by weekday (per program) ---------- */
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], WD_ORDER=[1,2,3,4,5,6,0];
+function nuAll(){ return LS.get("liftlog.nextup",{})||{}; }
+function nuGet(){ const p=getProgram(); return p? (nuAll()[p.pid||p.name]||{mode:"order",week:{}}) : {mode:"order",week:{}}; }
+function nuSet(cfg){ const p=getProgram(); if(!p) return; const a=nuAll(); a[p.pid||p.name]=cfg; LS.set("liftlog.nextup",a); }
+function orderNext(days){ // day after the last program day logged in order (one-off picks don't move the order)
+  const last=sessions.find(s=>!s.oneOff && days.some(d=>d.name===s.name));
+  if(!last) return days[0];
+  const k=days.findIndex(d=>d.name===last.name); return days[(k+1)%days.length];
+}
+function nextUpInfo(){
+  const days=programDays(); if(days.length<2) return null;
+  const cfg=nuGet(), byId=id=>days.find(d=>d.id===id);
+  if(cfg.pick){ const d=byId(cfg.pick.id); const used=sessions.some(s=>s.oneOff&&new Date(s.date)>=new Date(cfg.pick.at));
+    if(d&&!used) return {day:d, how:"pick", label:d.name}; }
+  if(cfg.mode==="week"){
+    const today=new Date(), doneToday=sessions.some(s=>new Date(s.date).toDateString()===today.toDateString()&&days.some(d=>d.name===s.name));
+    for(let k=0;k<7;k++){ const wd=(today.getDay()+k)%7, d=byId(cfg.week&&cfg.week[wd]); if(!d) continue; if(k===0&&doneToday) continue;
+      return {day:d, how:"week", label:d.name, when:k===0?"Today":k===1?"Tomorrow":WD[wd]}; }
+  }
+  return {day:orderNext(days), how:"order", label:orderNext(days).name};
+}
+function nextUpHtml(){ const n=nextUpInfo(); if(!n) return "";
+  return `<button class="nubtn" data-nextup>Next up: <b>${n.when?esc(n.when)+" · ":""}${esc(n.label)}</b>${n.how==="pick"?' <span class="nutag">one-off</span>':""} <span class="chev">›</span></button>`; }
+function lastDoneText(d){ const s=sessions.find(x=>x.name===d.name); return s?`done ${agoText(s.date)}`:"not done yet"; }
+function openNextUp(tab){
+  const days=programDays(), cfg=nuGet(), cur=nextUpInfo(); if(!cur) return;
+  tab = tab || (cfg.pick&&cur.how==="pick" ? "pick" : cfg.mode==="week" ? "week" : "order");
+  let sel = cur.day.id;
+  const on=orderNext(days);
+  const dayRow=(d,note)=>`<button class="nuopt ${d.id===sel?"on":""}" data-nud="${d.id}"><span class="rd"></span><span class="sp"><b>${esc(d.name)}</b><small>${d.items.length} exercise${d.items.length===1?"":"s"} · ${note||lastDoneText(d)}</small></span></button>`;
+  const body = tab==="order" ? `<div class="nuhint">Rotates through your program days in order.</div>
+      ${days.map(d=>dayRow(d, d.id===on.id?"next in your order":lastDoneText(d))).join("")}`
+    : tab==="pick" ? `<div class="nuhint">A one-off: after you log it, your order carries on where it was.</div>${days.map(d=>dayRow(d)).join("")}`
+    : `<div class="nuhint">Pick a day for each weekday you train. Days left blank are rest days.</div>
+      <div class="nuweek">${WD_ORDER.map(w=>`<label><span>${WD[w]}</span><select data-nuw="${w}"><option value="">Rest</option>${days.map(d=>`<option value="${d.id}" ${cfg.week&&cfg.week[w]===d.id?"selected":""}>${esc(d.name)}</option>`).join("")}</select></label>`).join("")}</div>`;
+  modal(`<div class="sheet">
+    <div class="row"><h3 class="sp">What's next?</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="seg" style="margin:4px 0 12px">${[["order","Follow order"],["pick","Pick a day"],["week","By weekday"]].map(([k,l])=>`<button data-nut="${k}" class="${k===tab?"on":""}">${l}</button>`).join("")}</div>
+    ${body}
+    <div class="row" style="gap:8px;margin-top:12px">
+      ${tab==="week"?`<button class="btn primary block" id="nuSave">Save schedule</button>`:
+        `<button class="btn" id="nuSet" style="flex:1">${tab==="order"?"Use this order":"Set as next"}</button><button class="btn primary" id="nuGo" style="flex:1">Start <span id="nuGoName">${esc(days.find(d=>d.id===sel).name)}</span> now</button>`}
+    </div>
+    ${tab==="week"&&cfg.mode==="week"?`<button class="lnk" id="nuOff" style="display:block;margin:12px auto 0;font-size:13px">Stop using a weekly schedule</button>`:""}
+    <div class="muted" style="font-size:12px;margin-top:10px;text-align:center">To change the days themselves, use <b>Change → Edit program</b>.</div>
+  </div>`);
+  document.querySelectorAll("[data-nut]").forEach(b=>b.onclick=()=>openNextUp(b.dataset.nut));
+  document.querySelectorAll("[data-nud]").forEach(b=>b.onclick=()=>{ sel=b.dataset.nud;
+    document.querySelectorAll("[data-nud]").forEach(x=>x.classList.toggle("on",x===b)); const g=$("#nuGoName"); if(g) g.textContent=days.find(d=>d.id===sel).name; });
+  const done=msg=>{ closeModal(); toast(msg); renderLog(); };
+  const isOneOff=()=> tab==="pick" || sel!==(cfg.mode==="week"&&cur.how==="week"?cur.day.id:on.id);
+  const set=$("#nuSet"); if(set) set.onclick=()=>{
+    const c=nuGet(); delete c.pick;
+    if(tab==="order"){ c.mode="order"; if(sel!==on.id) c.pick={id:sel,at:new Date().toISOString()}; }
+    else c.pick={id:sel,at:new Date().toISOString()};
+    nuSet(c); done(c.pick?`Next up: ${days.find(d=>d.id===sel).name} (one-off)`:"Following your program order"); };
+  const go=$("#nuGo"); if(go) go.onclick=()=>{ const d=days.find(x=>x.id===sel); const one=isOneOff();
+    const c=nuGet(); if(one){ c.pick={id:sel,at:new Date(Date.now()-1000).toISOString()}; nuSet(c); }
+    closeModal(); startSession(d); if(one&&active){ active.oneOff=true; saveDraft(); } };
+  const sv=$("#nuSave"); if(sv) sv.onclick=()=>{ const w={}; document.querySelectorAll("[data-nuw]").forEach(s=>{ if(s.value) w[s.dataset.nuw]=s.value; });
+    const c=nuGet(); c.week=w; c.mode=Object.keys(w).length?"week":"order"; delete c.pick; nuSet(c);
+    done(Object.keys(w).length?"Weekly schedule saved":"No days set, so following your program order"); };
+  const off=$("#nuOff"); if(off) off.onclick=()=>{ const c=nuGet(); c.mode="order"; delete c.pick; nuSet(c); done("Following your program order"); };
+}
+
 function suggestNext(){
   const days=programDays(); if(days.length<2) return "";
   const last=sessions.find(s=>days.some(d=>d.name===s.name)); if(!last) return "";
@@ -1561,7 +1652,7 @@ async function finishSession(){
   // drop empty sets / items
   const items = active.items.map(it=>({name:it.name,kind:it.kind,...(it.unit?{unit:it.unit}:{}),...(it.kind==="w"&&it.lo!=null?{lo:it.lo,hi:it.hi}:{}),...(watchOf(it)?{watch:watchOf(it)}:{}),sets:it.sets.filter(s=>s.done).map(s=>{const o={done:true};["w","r","d","t","a","q"].forEach(k=>{if(s[k]!=null)o[k]=s[k]});return o;})})).filter(it=>it.sets.length);
   if(!items.length){ confirmDlg("No sets are ticked yet. Tick ✓ on the sets you completed, or discard the session.","OK",()=>{},true); return; }
-  const doc={ date:active.date, name:active.name||"Session", items, notes:active.notes||"", durationMin:active.editing?active.durationMin:Math.round((Date.now()-active.startedAt)/60000), ...(active.editing&&active.comment?{comment:active.comment}:{}) };
+  const doc={ date:active.date, name:active.name||"Session", items, notes:active.notes||"", durationMin:active.editing?active.durationMin:Math.round((Date.now()-active.startedAt)/60000), ...(active.oneOff?{oneOff:true}:{}), ...(active.editing&&active.comment?{comment:active.comment}:{}) };
   const id=active.id;
   const btn=$("#finish"); btn.disabled=true; btn.textContent="Saving…";
   try{ await putSession(id,doc); }
@@ -2302,7 +2393,7 @@ function showBanner(t){ const b=$("#banner"); b.textContent=t; b.classList.remov
    Signed in = everything still saves on the device first, then syncs to the user's own rows in Supabase.
    Usernames are turned into a hidden address (name@upliftlog.app) because Supabase logins need one; no email is ever sent. */
 const SUPA = { url:"https://hmouplsqtozcrvtshxjo.supabase.co", key:"sb_publishable_36i68B-pMzA8GhwzybPDqw_194NShV9", domain:"upliftlog.app" };
-const SYNC_SETTINGS = ["profile","program","programs","baseline","targets"]; // liftlog.<name>
+const SYNC_SETTINGS = ["profile","program","programs","baseline","targets","nextup"]; // liftlog.<name>
 const SYNC_KEYS = new Set(["liftlog.sessions","liftlog.weights",...SYNC_SETTINGS.map(k=>"liftlog."+k)]);
 let syncing=false, syncTimer=null, applyingRemote=false, syncState={s:"idle",msg:""};
 const getAuth=()=>LS.get("liftlog.auth",null);
@@ -2428,7 +2519,7 @@ function accountHtml(){
     <div class="row" style="gap:8px"><button class="btn small primary" data-auth="signup">Create account</button><button class="btn small" data-auth="login">Sign in</button></div></div>`;
   const a=getAuth();
   return `<h2>Account</h2><div class="card acct">
-    <div class="row" style="gap:10px"><div class="avatar">${esc((a.username||"?").slice(0,1).toUpperCase())}</div>
+    <div class="row" style="gap:10px"><button class="avbtn" data-avpick aria-label="Change avatar">${avHtml(myAvatar()&&myAvatar().e,myAvatar()&&myAvatar().c,a.username,"av avmid")}<span>✎</span></button>
       <div class="sp"><b>@${esc(a.username||"you")}</b><small id="syncLine"></small></div>
       <button class="btn small" id="syncNowBtn">Sync now</button></div>
     <label class="sharerow"><span><b>Share my sessions with friends</b><small>Leaderboard and feed: name, time, tons/km and one highlight</small></span><input type="checkbox" id="shareTog" ${shareOn()?"checked":""}></label>
@@ -2437,6 +2528,7 @@ function accountHtml(){
 function bindAccount(){
   document.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth));
   const s=$("#syncNowBtn"); if(s) s.onclick=()=>syncNow({toast:true});
+  document.querySelectorAll("[data-avpick]").forEach(b=>b.onclick=openAvatarPicker);
   const o=$("#signOutBtn"); if(o) o.onclick=signOutFlow;
   const d=$("#delCloudBtn"); if(d) d.onclick=deleteCloudFlow;
   const sh=$("#shareTog"); if(sh) sh.onchange=()=>{ const p=getProfile(); p.shareFeed=sh.checked; LS.set("liftlog.profile",p); toast(sh.checked?"Sharing with friends":"Sessions hidden from friends"); syncNow(); };
@@ -2533,10 +2625,44 @@ function sessionHighlight(s){
   if(run) return `${run.n} ${kmTxt(run.d)}${run.t?` @ ${fmtTime(Math.round(run.t/(run.d/1000)))}/km`:""}`;
   const st=(s.items||[]).find(it=>it.kind==="s"); return st?st.name:"";
 }
+/* ---------- avatars: an emoji on a colour, shown to friends ---------- */
+const AV_COLORS={orange:"#FAC775",blue:"#B5D4F4",green:"#C0DD97",purple:"#CECBF6",red:"#F7C1C1",yellow:"#FAEEDA",pink:"#F4C0D1",grey:"#D3D1C7"};
+const AV_EMOJI=[["Lifting","🏋️ 💪 🦾 🥇 🏆 🎯 ⚡ 🔥"],["Running and cardio","🏃 🚴 🏊 🧗 🥾 👟 ⛰️ 🌊"],["Animals","🦍 🐻 🦁 🐺 🐯 🦅 🐂 🦈 🐆 🐢"],["Aviation","✈️ 🛫 🚀 🛩️ 🪂 🌍"],["Fun","🍗 🥚 🍌 ☕ 😤 😎 🤖 👑"]].map(([t,s])=>[t,s.split(" ")]);
+const AV_ALL=AV_EMOJI.flatMap(g=>g[1]);
+function myAvatar(){ const a=getProfile().avatar; return a&&AV_COLORS[a.c]?{e:AV_ALL.includes(a.e)?a.e:"",c:a.c}:null; }
+function avHtml(e,c,name,cls="av"){
+  const bg=AV_COLORS[c]; const em=e&&AV_ALL.includes(e)?e:"";
+  if(bg&&em) return `<div class="${cls} hasem" style="background:${bg}">${em}</div>`;
+  return `<div class="${cls}" ${bg?`style="background:${bg};color:#2C2C2A;border-color:transparent"`:""}>${esc((name||"?").slice(0,1).toUpperCase())}</div>`;
+}
+let AVCOL=LS.get("liftlog.avcol",true)!==false;
+function noAvCols(e){ return /avatar_|PGRST204|column/i.test(e&&e.message||""); }
+function openAvatarPicker(){
+  const cur=myAvatar()||{e:"",c:"orange"}; let e=cur.e, c=cur.c; const name=(getAuth()&&getAuth().username)||getProfile().name||"you";
+  modal(`<div class="sheet">
+    <div class="row"><h3 class="sp">Your avatar</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="avprev" id="avPrev"></div>
+    <div class="muted" style="text-align:center;font-size:12.5px;margin:-4px 0 12px">Friends see this on the leaderboard and in Activity.</div>
+    <div class="avcols">${Object.entries(AV_COLORS).map(([k,v])=>`<button class="avc ${k===c?"on":""}" data-avc="${k}" style="background:${v}" aria-label="${k}"></button>`).join("")}</div>
+    ${AV_EMOJI.map(([t,list])=>`<div class="avh">${t}</div><div class="avgrid">${list.map(x=>`<button class="ave ${x===e?"on":""}" data-ave="${x}">${x}</button>`).join("")}</div>`).join("")}
+    <button class="ave letter ${!e?"on":""}" data-ave="" style="width:auto;padding:0 14px;margin-top:10px">Use my first letter</button>
+    <button class="btn primary block" id="avSave" style="margin-top:16px;padding:14px">Save avatar</button>
+  </div>`);
+  const paint=()=>{ $("#avPrev").innerHTML=avHtml(e,c,name,"av avbig");
+    document.querySelectorAll("[data-avc]").forEach(b=>b.classList.toggle("on",b.dataset.avc===c));
+    document.querySelectorAll("[data-ave]").forEach(b=>b.classList.toggle("on",b.dataset.ave===e)); };
+  document.querySelectorAll("[data-avc]").forEach(b=>b.onclick=()=>{ c=b.dataset.avc; paint(); });
+  document.querySelectorAll("[data-ave]").forEach(b=>b.onclick=()=>{ e=b.dataset.ave; paint(); });
+  $("#avSave").onclick=()=>{ const p=getProfile(); p.avatar={e,c}; LS.set("liftlog.profile",p);
+    const m=LS.get("liftlog.syncMeta",null); if(m){ m.feedShared=false; localStorage.setItem("liftlog.syncMeta",JSON.stringify(m)); }
+    previewCache=null; closeModal(); toast("Avatar saved"); const y=window.scrollY; show(view); window.scrollTo(0,y); if(signedIn()) syncNow(); };
+  paint();
+}
 function feedRow(s,uid){
   const t=sessionStats(s);
   return {user_id:uid,session_id:s.id,started_at:s.date,title:String(s.name||"Session").slice(0,40),kind:t.hasW&&t.hasC?"mix":t.hasC?"cardio":"strength",
-    minutes:t.min?Math.round(t.min):null,kg:t.kg?Math.round(t.kg):null,km:t.km?+t.km.toFixed(2):null,pace_s:t.pace?Math.round(t.pace):null,sets:t.sets||null,highlight:sessionHighlight(s).slice(0,80)};
+    minutes:t.min?Math.round(t.min):null,kg:t.kg?Math.round(t.kg):null,km:t.km?+t.km.toFixed(2):null,pace_s:t.pace?Math.round(t.pace):null,sets:t.sets||null,highlight:sessionHighlight(s).slice(0,80),
+    ...(AVCOL?(a=>({avatar_e:a?a.e||null:null,avatar_c:a?a.c:null}))(myAvatar()):{})};
 }
 async function publishFeed(meta,changedIds,deletedIds){ // called from push(); never breaks sync if it fails
   try{
@@ -2545,7 +2671,9 @@ async function publishFeed(meta,changedIds,deletedIds){ // called from push(); n
     let ids=changedIds;
     if(!meta.feedShared||meta.feedVer!==1){ ids=sessions.map(s=>s.id); }
     const rows=sessions.filter(s=>ids.includes(s.id)&&!String(s.id).startsWith("demo_")).map(s=>feedRow(s,uid));
-    for(let i=0;i<rows.length;i+=200) await api("/rest/v1/feed?on_conflict=user_id,session_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(rows.slice(i,i+200))});
+    const post=rs=>api("/rest/v1/feed?on_conflict=user_id,session_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(rs)});
+    for(let i=0;i<rows.length;i+=200){ const chunk=rows.slice(i,i+200);
+      try{ await post(chunk); }catch(e){ if(AVCOL&&noAvCols(e)){ AVCOL=false; LS.set("liftlog.avcol",false); await post(chunk.map(({avatar_e,avatar_c,...r})=>r)); } else throw e; } }
     const gone=deletedIds.concat(sessions.filter(s=>String(s.id).startsWith("demo_")&&ids.includes(s.id)).map(s=>s.id));
     if(gone.length) await api(`/rest/v1/feed?user_id=eq.${uid}&session_id=in.(${gone.map(x=>`"${x}"`).join(",")})`,{method:"DELETE"});
     meta.feedShared=true; meta.feedVer=1;
@@ -2555,10 +2683,13 @@ async function loadFriends(){
   if(!signedIn()||friendsLoading) return; friendsLoading=true; friendsErr="";
   try{
     const ws=weekStart(), lw=new Date(ws); lw.setDate(lw.getDate()-7);
-    const cols="user_id,session_id,username,started_at,title,kind,minutes,kg,km,pace_s,sets,highlight";
-    const [feed,week]=await Promise.all([
-      api(`/rest/v1/feed?select=${cols}&order=started_at.desc&limit=30`).then(r=>r.json()),
-      api(`/rest/v1/feed?select=user_id,username,started_at,kind,minutes,kg,km&started_at=gte.${encodeURIComponent(lw.toISOString())}&limit=2000`).then(r=>r.json())]);
+    const get=av=>{ const x=av?",avatar_e,avatar_c":"";
+      return Promise.all([
+        api(`/rest/v1/feed?select=user_id,session_id,username,started_at,title,kind,minutes,kg,km,pace_s,sets,highlight${x}&order=started_at.desc&limit=30`).then(r=>r.json()),
+        api(`/rest/v1/feed?select=user_id,username,started_at,kind,minutes,kg,km${x}&started_at=gte.${encodeURIComponent(lw.toISOString())}&limit=2000`).then(r=>r.json())]); };
+    let feed,week;
+    try{ [feed,week]=await get(true); if(!AVCOL){ AVCOL=true; LS.set("liftlog.avcol",true); const m=LS.get("liftlog.syncMeta",null); if(m){ m.feedShared=false; localStorage.setItem("liftlog.syncMeta",JSON.stringify(m)); scheduleSync(500); } } }
+    catch(e){ if(!noAvCols(e)) throw e; AVCOL=false; LS.set("liftlog.avcol",false); [feed,week]=await get(false); }
     let kudos=[]; if(feed.length){ const ids=[...new Set(feed.map(f=>f.session_id))]; kudos=await api(`/rest/v1/kudos?select=user_id,owner_id,session_id&session_id=in.(${ids.map(x=>`"${x}"`).join(",")})`).then(r=>r.json()); }
     friendsCache={feed,week,kudos,at:new Date().toISOString()}; LS.set("liftlog.friendsCache",friendsCache);
   }catch(e){ friendsErr = e.message==="offline"?"You're offline: showing what was loaded last.":/relation|does not exist|404|schema cache/i.test(e.message)?"Friends isn't set up in the database yet (run the Friends script in Supabase).":"Couldn't load friends: "+e.message; }
@@ -2566,7 +2697,8 @@ async function loadFriends(){
 }
 function lbRows(week,from,to){
   const m={};
-  week.forEach(r=>{ const d=new Date(r.started_at); if(d<from||(to&&d>=to)) return; const k=r.user_id; const o=m[k]||(m[k]={uid:k,name:r.username||"friend",sessions:0,kg:0,km:0,minutes:0});
+  week.forEach(r=>{ const d=new Date(r.started_at); if(d<from||(to&&d>=to)) return; const k=r.user_id; const o=m[k]||(m[k]={uid:k,name:r.username||"friend",sessions:0,kg:0,km:0,minutes:0,at:""});
+    if(r.started_at>o.at){ o.at=r.started_at; o.ae=r.avatar_e; o.ac=r.avatar_c; }
     o.sessions++; o.kg+=+r.kg||0; o.km+=+r.km||0; o.minutes+=+r.minutes||0; });
   return Object.values(m);
 }
@@ -2574,11 +2706,11 @@ const LBM={sessions:{l:"Sessions",f:v=>v,u:""},kg:{l:"Lifted",f:v=>kgParts(v).jo
 function previewFriends(){ // made-up group shown when signed out, so people can see what the tab looks like
   let seed=11; const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const S=makeSampleData().sessions, me=(getProfile().name||"you").toLowerCase().replace(/[^a-z0-9._-]/g,"")||"you";
-  const people=[{id:"p_me",n:me},{id:"p_sam",n:"sam"},{id:"p_mei",n:"mei.runs"},{id:"p_raj",n:"raj"},{id:"p_jo",n:"jo_lifts"}];
+  const ma=myAvatar(); const people=[{id:"p_me",n:me,e:ma?ma.e:"",c:ma?ma.c:""},{id:"p_sam",n:"sam",e:"🚀",c:"purple"},{id:"p_mei",n:"mei.runs",e:"🏃",c:"blue"},{id:"p_raj",n:"raj"},{id:"p_jo",n:"jo_lifts",e:"🦍",c:"orange"}];
   const plan=[[0,0,1],[1,0,0],[2,1,4],[3,2,1],[4,1,2],[5,3,3],[6,4,0],[7,2,0],[8,1,5],[9,3,2],[10,4,1],[11,0,3],[12,1,8],[13,2,6],[14,4,7],[15,0,9],[16,3,10],[17,1,11]];
   const feed=[];
   plan.forEach(([si,pi,ago],n)=>{ const s=JSON.parse(JSON.stringify(S[si%S.length])); const t=new Date(); t.setDate(t.getDate()-ago); t.setHours(6+((n*5)%14),(n*17)%60,0,0);
-    if(t>new Date()) t.setHours(t.getHours()-12); s.id="pv"+n; s.date=t.toISOString(); const r=feedRow(s,people[pi].id); r.username=people[pi].n; feed.push(r); });
+    if(t>new Date()) t.setHours(t.getHours()-12); s.id="pv"+n; s.date=t.toISOString(); const r=feedRow(s,people[pi].id); r.username=people[pi].n; r.avatar_e=people[pi].e||null; r.avatar_c=people[pi].c||null; feed.push(r); });
   feed.sort((a,b)=>b.started_at.localeCompare(a.started_at));
   const kudos=[]; feed.forEach(f=>people.forEach(u=>{ if(u.id!==f.user_id&&u.id!=="p_me"&&rnd()<0.35) kudos.push({user_id:u.id,owner_id:f.user_id,session_id:f.session_id}); }));
   return {feed:feed.slice(0,30),week:feed,kudos,at:new Date().toISOString(),preview:true,me:"p_me"};
@@ -2596,11 +2728,11 @@ function renderFriends(){
   const max=Math.max(1,...rows.map(r=>r[lbMetric]));
   const kc=(o,s)=>C.kudos.filter(k=>k.owner_id===o&&k.session_id===s), mine=(o,s)=>kc(o,s).some(k=>k.user_id===me);
   el.innerHTML=`${preview?`<div class="card frpv"><b>👀 Preview with sample friends</b><div class="muted">This is what Friends looks like with a group. Create an account or sign in to see your real friends' week.</div>
-      <div class="row" style="gap:8px;margin-top:10px"><button class="btn small primary" data-auth="signup">Create account</button><button class="btn small" data-auth="login">Sign in</button></div></div>`:""}
+      <div class="row" style="gap:8px;margin-top:10px"><button class="btn small primary" data-auth="signup">Create account</button><button class="btn small" data-auth="login">Sign in</button><button class="btn small" data-avpick>Pick avatar</button></div></div>`:""}
     <div class="row" style="margin:6px 2px 10px;align-items:flex-end"><h2 class="sp" style="margin:0">This week</h2><span class="muted" style="font-size:12px">${fmtDate(ws,{day:"numeric",month:"short"})} – ${fmtDate(new Date(we-1),{day:"numeric",month:"short"})} · resets in ${daysLeft} day${daysLeft===1?"":"s"}</span></div>
     <div class="card lb">
       <div class="seg lbseg">${Object.entries(LBM).map(([k,v])=>`<button data-lbm="${k}" class="${k===lbMetric?"on":""}">${v.l}</button>`).join("")}</div>
-      ${rows.length?rows.map((r,i)=>`<div class="lbr ${r.uid===me?"me":""}"><div class="md">${medal(i)}</div><div class="av">${esc(r.name.slice(0,1).toUpperCase())}</div>
+      ${rows.length?rows.map((r,i)=>`<div class="lbr ${r.uid===me?"me":""}"><div class="md">${medal(i)}</div>${avHtml(r.ae,r.ac,r.name)}
         <div class="sp"><b>@${esc(r.name)}${r.uid===me?' <span class="you">you</span>':""}</b><div class="bar"><i style="width:${Math.max(4,r[lbMetric]/max*100)}%"></i></div></div>
         <div class="v">${M.f(r[lbMetric])}${M.u}</div></div>`).join("")
       :`<div class="muted" style="font-size:13px;padding:14px 4px;text-align:center">Nobody's trained yet this week. Be the first on the board 💪</div>`}
@@ -2614,13 +2746,14 @@ function renderFriends(){
       const groups=[]; C.feed.forEach(f=>{ const l=dayLabel(f.started_at); let g=groups[groups.length-1]; if(!g||g.l!==l) groups.push(g={l,items:[]}); g.items.push(f); });
       return groups.map(g=>`<div class="fday">${g.l}</div><div class="card flist">${g.items.map(f=>{ const k=kc(f.user_id,f.session_id).length, my=mine(f.user_id,f.session_id), self=f.user_id===me;
         const stats=[f.kg&&kgParts(+f.kg).join(" "), f.km&&`${(+f.km).toFixed(1)} km`, f.minutes&&(f.minutes>=100?Math.floor(f.minutes/60)+"h "+String(f.minutes%60).padStart(2,"0"):f.minutes+" min"), f.pace_s&&!f.kg&&`${fmtTime(f.pace_s)}/km`].filter(Boolean);
-        return `<div class="fr"><div class="av">${esc((f.username||"?").slice(0,1).toUpperCase())}</div>
+        return `<div class="fr">${avHtml(f.avatar_e,f.avatar_c,f.username)}
           <div class="sp fb"><div class="fl1"><b>${self?"You":esc(f.username||"friend")}</b><span class="dot ${f.kind}"></span><span class="fs">${esc(f.title)}</span></div>
             <div class="fl2">${stats.map(esc).join(" · ")}${f.highlight&&f.kind!=="cardio"?`<span class="fhl2">★ ${esc(f.highlight)}</span>`:""}</div></div>
           <button class="kd2 ${my?"on":""}" data-kudo="${f.user_id}|${esc(f.session_id)}" ${self?"disabled":""} aria-label="Kudos">🔥${k?`<span>${k}</span>`:""}</button></div>`; }).join("")}</div>`).join(""); })()
     :`<div class="card muted" style="font-size:13px;text-align:center;padding:20px">No activity yet. Finished sessions from everyone in the group show up here.</div>`}
     <div class="muted" style="font-size:11.5px;line-height:1.45;margin:14px 4px 0">Friends see each session's name, time, tons or km and one highlight, never your notes, weigh-ins or full workouts. ${C.at&&!preview?`Updated ${agoText(C.at)}.`:""}</div>`;
   el.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth));
+  el.querySelectorAll("[data-avpick]").forEach(b=>b.onclick=openAvatarPicker);
   el.querySelectorAll("[data-lbm]").forEach(b=>b.onclick=()=>{ lbMetric=b.dataset.lbm; renderFriends(); });
   const rf=$("#frRefresh"); if(rf) rf.onclick=()=>{ loadFriends(); renderFriends(); };
   el.querySelectorAll("[data-kudo]").forEach(b=>b.onclick=()=>toggleKudo(...b.dataset.kudo.split("|")));
@@ -2637,7 +2770,7 @@ async function toggleKudo(owner,sid){
   }catch(e){ showBanner("Couldn't save kudos: "+e.message); loadFriends(); }
 }
 
-const APP={version:"1.0", build:39, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
+const APP={version:"1.0", build:41, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
 /* ================== HELP & TOUR ================== */
 const TOUR=[
   {i:"👋",t:"Welcome to UP/LIFT",b:"Log your workouts, see your progress and train alongside friends. It runs in your browser: nothing to install, no ads, and everything is saved on your phone."},

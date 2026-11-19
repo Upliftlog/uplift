@@ -1,5 +1,5 @@
 // UP/LIFT offline cache. Bump VERSION whenever you upload a new index.html.
-const VERSION = "uplift-v39";
+const VERSION = "uplift-v41";
 const FILES = ["./", "index.html", "manifest.json", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "icon.svg"];
 self.addEventListener("install", e => {
   // first install activates straight away; updates wait until the app says "Refresh"
