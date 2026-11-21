@@ -84,8 +84,28 @@ a.btn{color:var(--text);text-decoration:none}
 .sp{flex:1}
 .sessionhead{display:flex;gap:10px;align-items:center;margin-bottom:12px}
 .sessionhead input{font-weight:700;font-size:17px;background:transparent;border-color:transparent;padding:6px 4px}
+.snamebox{flex:1;min-width:0;display:flex;align-items:center;gap:4px;border-bottom:1.5px dashed var(--line);cursor:text}
+.snamebox input{flex:1;min-width:0;width:100%}
+.snamebox span{color:var(--muted);font-size:15px;pointer-events:none}
+.snamebox:focus-within{border-bottom-color:var(--accent)}
 .sessionhead input:focus{background:var(--panel2)}
 .elapsed{color:var(--muted);font-size:13px;white-space:nowrap}
+.rqgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.rqgrid input{width:100%;min-width:0;box-sizing:border-box}
+.rq3{grid-column:span 2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.rqopt{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-top:4px}
+.updcard{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:60;max-width:460px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18);transform:translateY(20px);opacity:0;transition:transform .25s,opacity .25s}
+.updcard.in{transform:none;opacity:1} .updcard.out{transform:translateY(20px);opacity:0}
+.updcard .ucx{position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer}
+.updcard .uct{display:flex;gap:8px;align-items:center;font-size:15px;padding-right:28px} .updcard .uct span{color:var(--accent)}
+.updcard .ucl{font-size:13px;line-height:1.55;color:var(--text2);margin:6px 0 10px}
+.pn{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)} .pn:last-child{border-bottom:0}
+.pni{flex:none;width:34px;height:34px;border-radius:10px;background:var(--panel2);display:grid;place-items:center;font-size:17px}
+.pn div>b{display:block;font-size:15px} .pn p b{color:var(--text)} .pn p{margin:3px 0 0;font-size:13px;line-height:1.45;color:var(--text2)}
+.unitsw{font:inherit;font-size:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap}
+.sesside{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none}
+.savedind{font-size:11px;color:var(--muted);opacity:.55;transition:color .2s,opacity .2s;white-space:nowrap}
+.savedind.on{color:var(--good);opacity:1}
 .ex{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:12px}
 .exhead{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px}
 .exname{font-weight:700;font-size:16px;flex:1;line-height:1.25}
@@ -514,6 +534,8 @@ nav button{min-width:0}
 .ave{height:44px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-size:22px;padding:0;color:var(--text)}
 .ave.on{border:2px solid var(--accent);background:var(--oBg)}
 .ave.letter{font-size:13px;font-weight:600}
+.blstart{border-color:var(--oB);background:linear-gradient(160deg,var(--cBg),var(--panel))} .blstart>b{font-size:15px;display:block} .blstart .muted{font-size:13px;line-height:1.45;margin-top:3px}
+.blchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px} .blchips .chip{font-size:12.5px}
 </style>
 </head>
 <body>
@@ -724,7 +746,7 @@ function daysTo(d){ return Math.ceil((d - new Date())/86400000); }
 function pace(d,t){ if(!d||!t) return null; return t/(d/1000); } // sec per km
 function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),1800); }
 function setSummary(item,set){
-  if(item.kind==="w"){ return set.w!=null||set.r!=null ? `${set.w??"BW"}×${set.r??"?"}${set.q!=null?` RIR${set.q}`:""}` : null; }
+  if(item.kind==="w"){ return set.w!=null||set.r!=null ? `${set.w!=null&&isPl(item)?set.w+" pl":set.w??"BW"}×${set.r??"?"}${set.q!=null?` RIR${set.q}`:""}` : null; }
   if(item.kind==="c"){ if(set.d==null&&set.t==null) return null; const p=pace(set.d,set.t); return `${set.d?(set.d>=1000?(set.d/1000)+"km":set.d+"m"):""}${set.t?" "+fmtTime(set.t):""}${p?" ("+fmtTime(p)+"/km)":""}`.trim(); }
   if(item.kind==="s"){ if(set.a==null&&set.t==null&&set.w==null) return null; return `${set.a??""}${item.unit?" "+item.unit:""}${set.w?" @"+set.w+"kg":""}${set.t?" "+fmtTime(set.t):""}`.trim(); }
 }
@@ -734,7 +756,29 @@ function lastFor(name, excludeId){
     if(it && (it.sets||[]).some(x=>x.done)) return {session:s,item:it}; }
   return null;
 }
-function sessionVolume(s){ let v=0,sets=0; (s.items||[]).forEach(i=>(i.sets||[]).forEach(x=>{ if(!x.done) return; sets++; if(i.kind==="w"&&x.w&&x.r) v+=x.w*x.r; })); return {v,sets}; }
+/* ---------- session names: "Empty session" names itself from what's in it ---------- */
+const GENERIC_NAME=/^(empty session|session|workout|)$/i;
+function autoName(items){
+  const its=(items||[]).filter(i=>(i.sets||[]).some(x=>x.done!==false));
+  if(!its.length) return "Session";
+  const W=its.filter(i=>i.kind==="w"), C=its.filter(i=>i.kind==="c"), S=its.filter(i=>i.kind==="s");
+  const dist=i=>(i.sets||[]).reduce((n,x)=>n+(x.done!==false&&x.d?x.d:0),0);
+  if(!W.length&&!S.length){ if(C.length===1){ const d=dist(C[0]); return d?`${C[0].name} · ${kmTxt(d)}`:C[0].name; }
+    const d=C.reduce((n,i)=>n+dist(i),0); return d?`Cardio · ${kmTxt(d)}`:"Cardio"; }
+  if(W.length&&C.length) return `Strength + ${C.length===1?C[0].name:"Cardio"}`;
+  const L=W.length?W:S, extra=its.length-1; return `${L[0].name}${extra?` + ${extra} more`:""}`; }
+function sName(s){ return GENERIC_NAME.test(String(s&&s.name||"").trim()) ? autoName(s&&s.items) : s.name; }
+function sessionVolume(s){ let v=0,sets=0; (s.items||[]).forEach(i=>(i.sets||[]).forEach(x=>{ if(!x.done) return; sets++; if(i.kind==="w"&&i.unit!=="plates"&&x.w&&x.r) v+=x.w*x.r; })); return {v,sets}; } // plate sets have no kg, so they don't count toward tons
+/* ---------- kg or plates: cable and machine stacks often have no (or faded) numbers, so these can be logged in plates ---------- */
+const STACK_RE=/cable|machine|pulldown|pushdown|pec deck|face pull|leg curl|leg extension|hamstring curl|straight-arm/i;
+const isPl=it=>!!it&&it.unit==="plates";
+const wU=it=>isPl(it)?"plates":"kg";
+function exUnit(name){ // "plates" or "kg" for a lift: your last choice for it, else how you last logged it, else plates for cable/machine
+  const U=LS.get("liftlog.units",{})||{}; const k=Object.keys(U).find(n=>n.toLowerCase()===String(name).toLowerCase()); if(k) return U[k];
+  const l=lastFor(name); if(l) return l.item.unit==="plates"?"plates":"kg";
+  return STACK_RE.test(name)?"plates":"kg"; }
+function setExUnit(name,u){ const U=LS.get("liftlog.units",{})||{}; Object.keys(U).forEach(n=>{ if(n.toLowerCase()===name.toLowerCase()) delete U[n]; }); U[name]=u; LS.set("liftlog.units",U); }
+const plUnit=name=>exUnit(name)==="plates"?"plates":undefined;
 
 /* ================== COUNTDOWN ================== */
 // Countdown appears once someone names an event/goal or sets a target date. Tapping it opens their goals.
@@ -764,22 +808,43 @@ function newSet(item, idx){
   return s;
 }
 function editSession(s){ // re-open a saved session in the logging screen, every set already ticked
-  active={ id:s.id, editing:true, date:s.date, startedAt:Date.now(), name:s.name, notes:s.notes||"", durationMin:s.durationMin||0, comment:s.comment||"",
+  active={ id:s.id, editing:true, date:s.date, startedAt:Date.now(), name:GENERIC_NAME.test(String(s.name||"").trim())?"":s.name, notes:s.notes||"", durationMin:s.durationMin||0, comment:s.comment||"",
     items:(s.items||[]).map(i=>{ const it=JSON.parse(JSON.stringify(i));
       if(it.kind==="w"){ const t=getTarget(it.name,it); it.lo=it.lo??t.lo; it.hi=it.hi??t.hi; it.rest=t.rest; it.step=t.step; }
       it.sets=(it.sets||[]).map(x=>({...x,done:true})); return it; }) };
   saveDraft(); show("log"); toast("Editing session");
 }
 function startSession(tpl){
-  active = { id:"s"+Date.now(), date:new Date().toISOString(), startedAt:Date.now(), name:tpl.name, ...(tpl.id&&tpl.id!=="empty"&&programDays().some(d=>d.id===tpl.id)?{dayId:tpl.id, pid:getProgram().pid}:{}),
-    items: tpl.items.map(i=>{ const it={name:i.name, kind:i.kind, unit:i.unit, def:i.def, ...(i.sugW?{sugW:i.sugW}:{})};
+  active = { id:"s"+Date.now(), date:new Date().toISOString(), startedAt:Date.now(), name:tpl.id==="empty"?"":tpl.name, ...(tpl.id&&tpl.id!=="empty"&&programDays().some(d=>d.id===tpl.id)?{dayId:tpl.id, pid:getProgram().pid}:{}),
+    items: tpl.items.map(i=>{ const it={name:i.name, kind:i.kind, unit:i.kind==="w"?plUnit(i.name):i.unit, def:i.def, ...(i.sugW&&!(i.kind==="w"&&plUnit(i.name))?{sugW:i.sugW}:{})};
       let n=i.sets;
       if(i.kind==="w"){ const t=getTarget(i.name,i); Object.assign(it,{lo:t.lo,hi:t.hi,rest:t.rest,step:t.step}); if(t.sets) n=t.sets; }
       it.sets=Array.from({length:n},(_,k)=>newSet(i,k)); return it; }), notes:"" };
   saveDraft(); renderLog();
 }
-let draftTimer=null;
-function saveDraft(){ clearTimeout(draftTimer); draftTimer=setTimeout(()=>{ if(active) LS.set("liftlog.draft",active); else LS.del("liftlog.draft"); },300); }
+/* The live session is written to this phone on every change, straight away (no delay), and again when the page is hidden.
+   If UP/LIFT is open twice (home-screen icon + a tab), each copy picks up the newest saved session when it comes back,
+   so an older copy can never save over newer sets. */
+function saveDraft(){ if(active){ active.savedAt=Date.now(); LS.set("liftlog.draft",active); } else LS.del("liftlog.draft"); markSaved(); }
+let savedFlash=null;
+function markSaved(){ const e=$("#savedInd"); if(!e) return; e.textContent="Saved ✓"; e.classList.add("on"); clearTimeout(savedFlash); savedFlash=setTimeout(()=>e.classList.remove("on"),1200); }
+function adoptNewestDraft(){ // returns true if this copy's live session was replaced by a newer one saved by another copy
+  let d; try{ const v=localStorage.getItem("liftlog.draft"); d=v?JSON.parse(v):null; }catch(e){ return false; }
+  if(!active && !d) return false;
+  if(active && d && d.id===active.id && (d.savedAt||0)<=(active.savedAt||0)) return false;
+  if(active && !d){ active=null; stopRest(); toast("That session was saved or discarded in another window"); }
+  else { if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); active=d; }
+  return true; }
+function reloadFromPhone(){ // another copy of the app may have saved sessions or a newer live session meanwhile
+  const S=LS.get("liftlog.sessions",null), W=LS.get("liftlog.weights",null); let changed=false;
+  if(S && JSON.stringify(S)!==JSON.stringify(sessions)){ sessions=S; changed=true; }
+  if(W && JSON.stringify(W)!==JSON.stringify(weights)){ weights=W; changed=true; }
+  if(changed) rebuildKnown();
+  const took=adoptNewestDraft();
+  if(took || (changed && !(active&&view==="log"))){ const y=window.scrollY; show(view); window.scrollTo(0,y); } }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ if(active){ active.savedAt=Date.now(); LS.set("liftlog.draft",active); } } else reloadFromPhone(); });
+window.addEventListener("pagehide",()=>{ if(active){ active.savedAt=Date.now(); LS.set("liftlog.draft",active); } });
+window.addEventListener("storage",e=>{ if(e.key===null||["liftlog.draft","liftlog.sessions","liftlog.weights"].includes(e.key)) reloadFromPhone(); });
 
 function renderLog(){
   const el=$("#view-log");
@@ -792,6 +857,7 @@ function renderLog(){
       ${nextUpHtml()}
       <div class="tplgrid">${tpls().map(t=>`<button class="tpl ${isCardioDay(t)?"hy":""} ${nextUpInfo()&&nextUpInfo().day.id===t.id?"isnext":""}" data-t="${t.id}">${nextUpInfo()&&nextUpInfo().day.id===t.id?'<span class="ntag">Next</span>':""}<b>${esc(t.name)}</b><small>${esc(t.desc||t.items.map(i=>i.name).slice(0,3).join(" · "))}</small></button>`).join("")}</div>
       <button class="btn block" style="margin-top:10px" data-today>✦ Today's workout from Claude</button>` : chooserHtml()}
+      <div class="row" style="gap:8px;margin-top:8px">${getProgram()?"":`<button class="btn sp" data-empty style="white-space:nowrap;padding-left:8px;padding-right:8px">＋ Empty session</button>`}<button class="btn sp" data-quickrun style="white-space:nowrap;padding-left:8px;padding-right:8px">🏃 Log a run</button></div>
       <button class="btn block" style="margin-top:8px" data-addpast>＋ Add a past session</button>
       ${(getProgram() && !sessions.length && !Object.keys(LS.get("liftlog.baseline",{})).length) ? `<button class="card" data-gobase style="display:block;width:100%;text-align:left;margin-top:12px;border-color:var(--oB)"><b style="color:var(--text)">◎ Set up your profile first</b><div class="muted" style="font-size:13px;margin-top:4px;line-height:1.4">Add your details for daily calories, and your current weights so your first workout comes pre-filled.</div></button>` : ""}
       ${historyHtml()}`;
@@ -800,6 +866,8 @@ function renderLog(){
     el.querySelectorAll("[data-nextup]").forEach(b=>b.onclick=()=>openNextUp());
     el.querySelectorAll("[data-today]").forEach(b=>b.onclick=openTodaySheet);
     el.querySelectorAll("[data-addpast]").forEach(b=>b.onclick=openAddPastSheet);
+    el.querySelectorAll("[data-quickrun]").forEach(b=>b.onclick=openRunSheet);
+    el.querySelectorAll("[data-empty]").forEach(b=>b.onclick=()=>startSession(EMPTY_DAY));
     el.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth));
     el.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>{ installProgram(PRESETS[b.dataset.preset],{preset:b.dataset.preset}); toast("Program installed"); renderLog(); });
     el.querySelectorAll("[data-setup]").forEach(b=>b.onclick=openSetupSheet);
@@ -813,8 +881,8 @@ function renderLog(){
   el.innerHTML = `
     ${active.editing?`<div class="editbar"><span>✎ Editing a saved session</span><input type="datetime-local" id="sdate" value="${(d=>{const z=new Date(d); z.setMinutes(z.getMinutes()-z.getTimezoneOffset()); return z.toISOString().slice(0,16);})(active.date)}"></div>`:""}
     <div class="sessionhead">
-      <input id="sname" value="${esc(active.name)}">
-      ${active.editing?"":`<div class="elapsed mono" id="elapsed"></div>`}
+      <label class="snamebox"><input id="sname" value="${esc(active.name)}" placeholder="Name this session" maxlength="40"><span aria-hidden="true">✎</span></label>
+      <div class="sesside"><span class="savedind" id="savedInd">Saved ✓</span>${active.editing?"":`<div class="elapsed mono" id="elapsed"></div>`}</div>
     </div>
     <div id="exlist">${active.items.map((it,i)=>exCard(it,i)).join("")}</div>
     <button class="btn block" style="margin-bottom:12px;padding:14px" id="addExBtn">＋ Add exercise</button>
@@ -829,7 +897,7 @@ function renderLog(){
   $("#notes").oninput=e=>{active.notes=e.target.value;saveDraft()};
   $("#addExBtn").onclick=()=>pickExercise({title:"Add exercise", onPick:(n,kind,unit)=>{
     const k=KNOWN[n]||{};
-    const it={name:n,kind,unit:unit||k.unit||(kind==="s"?"m":undefined),sets:[]};
+    const it={name:n,kind,unit:kind==="w"?plUnit(n):(unit||k.unit||(kind==="s"?"m":undefined)),sets:[]};
     let count; const last=lastFor(n);
     if(kind==="w"){ const t=getTarget(n); Object.assign(it,{lo:t.lo,hi:t.hi,rest:t.rest,step:t.step}); count=t.sets||(last?last.item.sets.filter(s=>s.done).length:3); }
     else count= last? last.item.sets.filter(s=>s.done).length : 3;
@@ -1219,7 +1287,7 @@ function renderBuilder(keepScroll){
       <div><span class="l">Rest</span><select data-brest="${id}">${[...new Set([...RESTS, it.rest??120])].sort((a,b)=>a-b).map(r=>`<option value="${r}" ${(it.rest??120)===r?"selected":""}>${fmtTime(r)}</option>`).join("")}</select></div>`;
     else if(it.kind==="c") fields=`
       <div><span class="l">Sets</span><div class="stepper"><button data-bstep="${id}" data-v="-1">−</button><b>${it.sets??1}</b><button data-bstep="${id}" data-v="1">+</button></div></div>
-      <div style="grid-column:span 2"><span class="l">Distance (m, optional)</span><input inputmode="numeric" data-bdist="${id}" value="${it.def?.d??""}" placeholder="e.g. 5000"></div>`;
+      <div style="grid-column:span 2"><span class="l">Distance (km, optional)</span><input inputmode="decimal" data-bdist="${id}" value="${kmVal(it.def?.d)}" placeholder="e.g. 5"></div>`;
     else fields=`
       <div><span class="l">Sets</span><div class="stepper"><button data-bstep="${id}" data-v="-1">−</button><b>${it.sets??1}</b><button data-bstep="${id}" data-v="1">+</button></div></div>
       <div><span class="l">Amount</span><input inputmode="numeric" data-bamt="${id}" value="${it.def?.a??""}" placeholder="opt."></div>
@@ -1259,7 +1327,7 @@ function renderBuilder(keepScroll){
   document.querySelectorAll("[data-blo]").forEach(x=>x.oninput=()=>{ const o=at(x.dataset.blo); const v=Math.round(num(x.value)); if(v>0) o.lo=v; refreshSum(x.dataset.blo); });
   document.querySelectorAll("[data-bhi]").forEach(x=>x.oninput=()=>{ const o=at(x.dataset.bhi); const v=Math.round(num(x.value)); if(v>0) o.hi=v; refreshSum(x.dataset.bhi); });
   document.querySelectorAll("[data-brest]").forEach(x=>x.onchange=()=>{ at(x.dataset.brest).rest=+x.value; refreshSum(x.dataset.brest); });
-  document.querySelectorAll("[data-bdist]").forEach(x=>x.oninput=()=>{ const o=at(x.dataset.bdist); o.def=num(x.value)?{d:num(x.value)}:undefined; refreshSum(x.dataset.bdist); });
+  document.querySelectorAll("[data-bdist]").forEach(x=>x.oninput=()=>{ const o=at(x.dataset.bdist); o.def=parseKm(x.value)?{d:parseKm(x.value)}:undefined; refreshSum(x.dataset.bdist); });
   document.querySelectorAll("[data-bamt]").forEach(x=>x.oninput=()=>{ const o=at(x.dataset.bamt); o.def=num(x.value)?{a:num(x.value)}:undefined; refreshSum(x.dataset.bamt); });
   document.querySelectorAll("[data-bunit]").forEach(x=>x.onchange=()=>{ at(x.dataset.bunit).unit=x.value; refreshSum(x.dataset.bunit); });
   // picking a name fills sensible defaults for that exercise
@@ -1340,26 +1408,27 @@ function openSetupSheet(){
    Otherwise keep the weight and try to add a rep to each set.
    Below the bottom of the range two sessions running -> suggest a ~10% reset. */
 const roundTo=(x,st)=>Math.round(x/st)*st;
-function priorSessionsFor(name, excludeId, n=2){
+function priorSessionsFor(name, excludeId, n=2, pl=null){
   const out=[]; for(const s of sessions){ if(s.id===excludeId) continue;
-    const it=(s.items||[]).find(i=>i.name.toLowerCase()===name.toLowerCase());
+    const it=(s.items||[]).find(i=>i.name.toLowerCase()===name.toLowerCase() && (pl==null || (i.unit==="plates")===pl));
     if(it && it.sets.some(x=>x.done)) { out.push({session:s,item:it}); if(out.length>=n) break; } }
   return out;
 }
 function progressionFor(it){
   if(it.kind!=="w") return null;
-  const lo=it.lo??8, hi=it.hi??12, step=it.step??2.5;
-  const prev=priorSessionsFor(it.name, active&&active.id, 2);
-  if(!prev.length && it.sugW){ const want=Math.max(it.sets.length,1); return {state:"base", msg:`Claude suggests ${it.sugW} kg for ${lo}–${hi} reps.`, sug:Array.from({length:want},()=>({w:it.sugW,r:lo}))}; }
+  const pl=isPl(it), U=pl?"plates":"kg";
+  const lo=it.lo??8, hi=it.hi??12, step=pl?1:(it.step??2.5);
+  const prev=priorSessionsFor(it.name, active&&active.id, 2, pl);
+  if(!prev.length && it.sugW){ const want=Math.max(it.sets.length,1); return {state:"base", msg:`Claude suggests ${it.sugW} ${U} for ${lo}–${hi} reps.`, sug:Array.from({length:want},()=>({w:it.sugW,r:lo}))}; }
   if(!prev.length){
-    const b=getBaseline(it.name), want=Math.max(it.sets.length,1);
+    const b0=getBaseline(it.name), b=b0&&((b0.u==="plates")!==pl)?{...b0,w:null}:b0, want=Math.max(it.sets.length,1);
     if(!b || (b.w==null && b.r==null)) return {state:"new", msg:`No baseline yet — pick a weight you could lift for about 2 more reps than ${hi}, or set it on the Profile page.`, sug:[]};
     const fill=o=>Array.from({length:want},()=>o);
     if(b.w==null) return {state:"base", msg:`From your baseline: ${b.r} reps. Aim for ${Math.min(hi,b.r)}+ each set.`, sug:fill({r:Math.min(hi,b.r)})};
-    if(b.r==null) return {state:"base", msg:`From your baseline: start at ${b.w} kg and aim for ${lo}–${hi} reps.`, sug:fill({w:b.w,r:lo})};
-    if(b.r>=hi){ const nw=+(b.w+step).toFixed(2); return {state:"up", msg:`Baseline ${b.w}×${b.r} already hits the top of ${lo}–${hi} → start at ${nw} kg for ${lo}+ reps.`, sug:fill({w:nw,r:lo})}; }
-    if(b.r<lo){ const nw=Math.max(step,roundTo(b.w*0.9,step)); return {state:"hold", msg:`Baseline ${b.w}×${b.r} is under ${lo} reps → start lighter at ${nw} kg and aim for ${lo}+.`, sug:fill({w:nw,r:lo})}; }
-    return {state:"base", msg:`From your baseline: ${b.w} kg × ${b.r}. Match it on every set, then build to ${hi}.`, sug:fill({w:b.w,r:b.r})};
+    if(b.r==null) return {state:"base", msg:`From your baseline: start at ${b.w} ${U} and aim for ${lo}–${hi} reps.`, sug:fill({w:b.w,r:lo})};
+    if(b.r>=hi){ const nw=+(b.w+step).toFixed(2); return {state:"up", msg:`Baseline ${b.w}×${b.r} already hits the top of ${lo}–${hi} → start at ${nw} ${U} for ${lo}+ reps.`, sug:fill({w:nw,r:lo})}; }
+    if(b.r<lo){ const nw=Math.max(step,Math.min(b.w-step,roundTo(b.w*0.9,step))); return {state:"hold", msg:`Baseline ${b.w}×${b.r} is under ${lo} reps → start lighter at ${nw} ${U} and aim for ${lo}+.`, sug:fill({w:nw,r:lo})}; }
+    return {state:"base", msg:`From your baseline: ${b.w} ${U} × ${b.r}. Match it on every set, then build to ${hi}.`, sug:fill({w:b.w,r:b.r})};
   }
   const sets=prev[0].item.sets.filter(x=>x.done && x.r!=null);
   if(!sets.length) return null;
@@ -1370,22 +1439,34 @@ function progressionFor(it){
   const allTop = work.length>=Math.min(want,sets.length) && work.every(x=>x.r>=hi);
   const below = work.some(x=>x.r<lo);
   if(bw){
-    if(allTop) return {state:"up", msg:`All sets hit ${hi}. Add load (vest, plate, DB) or a harder variation.`, sug:work.map(()=>({r:hi}))};
+    if(allTop) return {state:"up", msg:`All sets hit ${hi}. Add load (vest, weight plate, DB) or a harder variation.`, sug:work.map(()=>({r:hi}))};
     return {state:"reps", msg:`Beat last time: +1 rep per set, up to ${hi}.`, sug:work.map(x=>({r:Math.min(hi,x.r+1)}))};
   }
   if(allTop){ const nw=+(topW+step).toFixed(2);
-    return {state:"up", msg:`Hit ${hi} on every set last time → go up to ${nw} kg and aim for ${lo}+ reps.`, sug:Array.from({length:want},()=>({w:nw,r:lo}))}; }
+    return {state:"up", msg:`Hit ${hi} on every set last time → go up to ${nw} ${U} and aim for ${lo}+ reps.`, sug:Array.from({length:want},()=>({w:nw,r:lo}))}; }
   if(below){
     const prevBelow = prev[1] && (()=>{ const ps=prev[1].item.sets.filter(x=>x.done&&x.r!=null); const tw=Math.max(...ps.map(x=>x.w||0)); if(tw!==topW) return false;
       const pw=ps.filter(x=>(x.w||0)===tw); const tot=a=>a.reduce((n,x)=>n+x.r,0);
       return pw.some(x=>x.r<lo) && tot(work) <= tot(pw); })();
-    if(prevBelow){ const nw=Math.max(step,roundTo(topW*0.9,step));
-      return {state:"down", msg:`Under ${lo} reps two sessions running at ${topW} kg → reset to ${nw} kg and build back up.`, sug:Array.from({length:want},()=>({w:nw,r:hi-1}))}; }
-    return {state:"hold", msg:`Fell short of ${lo} last time → stay at ${topW} kg and aim for ${lo}+ on every set.`, sug:Array.from({length:want},(_,j)=>({w:topW,r:Math.max(lo,(work[j]||work[work.length-1]).r)}))};
+    if(prevBelow){ const nw=Math.max(step,Math.min(topW-step,roundTo(topW*0.9,step)));
+      return {state:"down", msg:`Under ${lo} reps two sessions running at ${topW} ${U} → reset to ${nw} ${U} and build back up.`, sug:Array.from({length:want},()=>({w:nw,r:hi-1}))}; }
+    return {state:"hold", msg:`Fell short of ${lo} last time → stay at ${topW} ${U} and aim for ${lo}+ on every set.`, sug:Array.from({length:want},(_,j)=>({w:topW,r:Math.max(lo,(work[j]||work[work.length-1]).r)}))};
   }
-  return {state:"reps", msg:`Stay at ${topW} kg and add a rep per set (range ${lo}–${hi}).`, sug:Array.from({length:want},(_,j)=>({w:topW,r:Math.min(hi,((work[j]||work[work.length-1]).r)+1)}))};
+  return {state:"reps", msg:`Stay at ${topW} ${U} and add a rep per set (range ${lo}–${hi}).`, sug:Array.from({length:want},(_,j)=>({w:topW,r:Math.min(hi,((work[j]||work[work.length-1]).r)+1)}))};
 }
 /* ================== BASELINE ================== */
+function updateBaselinesFrom(doc){ // after a save, each exercise's starting weight becomes what you just did (if this is your newest log of it)
+  const B=LS.get("liftlog.baseline",{})||{}; let ch=false;
+  (doc.items||[]).forEach(it=>{ const sets=(it.sets||[]).filter(x=>x.done!==false); if(!sets.length) return;
+    const nm=it.name.toLowerCase();
+    if(sessions.some(s=>s.date>doc.date && (s.items||[]).some(i=>i.name.toLowerCase()===nm && (i.sets||[]).some(x=>x.done!==false)))) return;
+    const key=Object.keys(B).find(n=>n.toLowerCase()===nm)||it.name, o={date:new Date().toISOString(), auto:true};
+    if(it.kind==="w"){ const ws=sets.filter(x=>x.r!=null); if(!ws.length) return; const tw=Math.max(...ws.map(x=>x.w||0));
+      if(tw) o.w=tw; o.r=Math.max(...ws.filter(x=>(x.w||0)===tw).map(x=>x.r)); if(it.unit==="plates") o.u="plates"; }
+    else if(it.kind==="c"){ const best=sets.filter(x=>x.d||x.t).sort((a,b)=>(b.d||0)-(a.d||0))[0]; if(!best) return; if(best.d) o.d=best.d; if(best.t) o.t=best.t; }
+    else { const x=sets[0]; ["a","w","t"].forEach(k=>{ if(x[k]!=null) o[k]=x[k]; }); if(o.a==null&&o.w==null&&o.t==null) return; }
+    B[key]=o; ch=true; });
+  if(ch) LS.set("liftlog.baseline",B); }
 function getBaseline(name){ const B=LS.get("liftlog.baseline",{})||{}; const k=Object.keys(B).find(n=>n.toLowerCase()===name.toLowerCase()); const b=k?B[k]:null; return b&&["w","r","d","t","a"].some(f=>b[f]!=null)?b:null; }
 function baselineText(){ const B=LS.get("liftlog.baseline",{})||{}; const parts=Object.entries(B).map(([n,b])=>{ const k=KNOWN[n]||{kind:"w"}; const s=setSummary({kind:k.kind,unit:k.unit},b); return s?`${n} ${s}`:null; }).filter(Boolean);
   return parts.length?`Self-reported baselines (before logging): ${parts.join("; ")}.\n`:""; }
@@ -1424,18 +1505,23 @@ function renderBaseline(){
   const extra=new Set(); sessions.forEach(s=>(s.items||[]).forEach(i=>{ if(i.kind==="w"&&!seen.has(i.name)) extra.add(i.name); }));
   Object.keys(B).forEach(n=>{ if(!seen.has(n)&&(KNOWN[n]?.kind||"w")==="w") extra.add(n); });
   Object.keys(LS.get("liftlog.targets",{})||{}).forEach(n=>{ if(!seen.has(n)) extra.add(n); });
-  if(extra.size) groups.push({title:"Other lifts",items:[...extra].map(n=>({name:n,kind:"w"}))});
+  const noProg=!programDays().length;
+  if(extra.size) groups.push({title:noProg?"Your lifts":"Other lifts",items:[...extra].map(n=>({name:n,kind:"w"}))});
   const cardio=[], stations=[], cs=new Set();
-  programDays().forEach(d=>d.items.forEach(i=>{ if(i.kind!=="w"&&!cs.has(i.name)){ cs.add(i.name); (i.kind==="c"?cardio:stations).push(i); } }));
-  if(cardio.length) groups.push({title:"Running & cardio",items:cardio});
+  const addC=i=>{ if(i.kind!=="w"&&!cs.has(i.name)){ cs.add(i.name); (i.kind==="c"?cardio:stations).push(i); } };
+  programDays().forEach(d=>d.items.forEach(addC));
+  sessions.forEach(s=>(s.items||[]).forEach(i=>addC({name:i.name,kind:i.kind,unit:i.unit})));
+  Object.keys(B).forEach(n=>{ const x=exInfo(n); if(x.kind!=="w") addC({name:n,kind:x.kind,unit:x.unit}); });
+  if(cardio.length) groups.push({title:noProg?"Your runs & cardio":"Running & cardio",items:cardio});
   if(stations.length) groups.push({title:"Stations",items:stations});
-  if(!programDays().length) groups.unshift({title:"No program yet",items:[]});
+  const hasW=groups.some(g=>g.items.some(i=>i.kind==="w")), hasC=cardio.length||stations.length, empty=!groups.length;
+  const QUICK=[["Bench Press","w"],["Back Squat","w"],["Deadlift","w"],["Overhead Press","w"],["Lat Pulldown","w"],["Barbell Row","w"],["Easy Run","c"]].filter(([n])=>!B[n]&&!seen.has(n)&&!extra.has(n)&&!cs.has(n));
   const logged=n=>!!lastFor(n);
   const row=it=>{ const b=B[it.name]||{}; const t=it.kind==="w"?getTarget(it.name,it):null;
     const v=(f,x,ph,mode="decimal")=>`<input inputmode="${mode}" data-b="${esc(it.name)}" data-k="${it.kind}" data-f="${f}" value="${x==null?"":esc(f==="t"?fmtTime(x):x)}" placeholder="${esc(ph)}">`;
     let cells, cls="bl2";
-    if(it.kind==="w") cells=v("w",b.w,"kg")+v("r",b.r,"reps","numeric");
-    else if(it.kind==="c") cells=v("d",b.d??it.def?.d,"metres","numeric")+v("t",b.t,"m:ss","text");
+    if(it.kind==="w") cells=v("w",(b.u==="plates")===(exUnit(it.name)==="plates")?b.w:null,exUnit(it.name)==="plates"?"plates":"kg")+v("r",b.r,"reps","numeric");
+    else if(it.kind==="c") cells=`<input inputmode="decimal" data-b="${esc(it.name)}" data-k="c" data-f="d" value="${kmVal(b.d??it.def?.d)}" placeholder="km">`+v("t",b.t,"m:ss","text");
     else { cells=v("a",b.a??it.def?.a,it.unit||"amt","numeric")+v("w",b.w,"kg")+v("t",b.t,"m:ss","text"); cls="bl3"; }
     const tt = it.kind==="w" ? targetFor(it.name) : null;
     const chip = tt ? `<button class="tgt sm" data-btgt="${esc(it.name)}">🎯 ${tt.sets} × ${tt.lo}–${tt.hi} · ${fmtTime(tt.rest)}</button>` : "";
@@ -1471,9 +1557,13 @@ function renderBaseline(){
       <textarea data-p="about" placeholder="e.g. What you're training for, experience, injuries, days per week, equipment, anything the coach should know">${esc(P.about||"")}</textarea></label>
     </div></details>
     <details class="dd" data-dd="base" ${DD.base?"open":""}><summary>${ddIcon("lift")}<span class="ddt"><b>Starting weights</b><small>${nBase?`${nBase} lift${nBase===1?"":"s"} set`:"What you can lift today"}</small></span></summary>
-    <div class="card" style="font-size:13px;line-height:1.5;color:var(--text2)">For each exercise, set the <b style="color:var(--text)">🎯 target</b> (sets × rep range · rest) and what you can do <b style="color:var(--text)">right now for one solid set</b>, leaving 1–2 reps in the tank (not your 1-rep max). Workouts then suggest the weight and reps for every set. Once you've logged an exercise (<span class="tag">logged</span>), suggestions come from your latest session instead. Saves as you type. <span id="blSaved" class="muted"></span></div>
+    ${empty?"":`<div class="card" style="font-size:13px;line-height:1.5;color:var(--text2)">${hasW?`For lifts, enter what you can do <b style="color:var(--text)">right now for one solid set</b>, with 1–2 reps left in the tank (not your max). Tap 🎯 to set sets, reps and rest.`:""}${hasW&&hasC?" ":""}${hasC?`For runs and cardio, enter your usual distance and time.`:""} Workouts use these for your first suggestions; after that they follow your latest session (<span class="tag">logged</span>). Saves as you type. <span id="blSaved" class="muted"></span></div>`}
+    ${noProg?`<div class="card blstart"><b>${empty?"No program? No problem.":"Add more exercises"}</b>
+      <div class="muted">${empty?"Add the exercises you usually do and what you can manage today. Your first workouts will suggest weights from these.":"Tap to add common exercises."}</div>
+      ${QUICK.length?`<div class="blchips">${QUICK.map(([n,k])=>`<button class="chip" data-blq="${esc(n)}" data-blk="${k}">＋ ${esc(n)}</button>`).join("")}</div>`:""}
+      ${empty?`<div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn small" data-blprog>Choose a program</button><button class="btn small" data-blplan>✦ Get a personal plan</button></div>`:""}</div>`:""}
     ${groups.map(g=>`<div class="ddh">${esc(g.title)}</div><div class="card">${g.items.map(row).join("")}</div>`).join("")}
-    <button class="btn block" id="blAdd" style="margin-top:4px">＋ Add another lift</button>
+    <button class="btn block" id="blAdd" style="margin-top:4px">＋ Add exercise</button>
     </details>
     <details class="dd" data-dd="backup" ${DD.backup?"open":""}><summary>${ddIcon("data")}<span class="ddt"><b>Your data</b><small>${signedIn()?`Synced to @${esc(getAuth().username||"you")}`:LS.get("liftlog.lastBackup",null)?"Backed up "+fmtDate(LS.get("liftlog.lastBackup",null),{day:"numeric",month:"short"}):"Backup, restore, sample data"}</small></span></summary>${backupHtml()}</details>
     <h2>Appearance</h2>
@@ -1481,7 +1571,7 @@ function renderBaseline(){
     <div class="muted" style="font-size:12px;margin:6px 2px 0">Auto follows your phone's light or dark setting.</div>
     <button class="card" data-setup2 style="display:block;width:100%;text-align:left;border-color:var(--oB);margin-top:14px"><b style="color:var(--text)">✦ Get a personal plan</b><div class="muted" style="font-size:13px;margin-top:4px;line-height:1.4">Chat with Claude about your goals and it fills in this page, your starting weights and a program made for you.</div></button>
     <button class="card helprow" data-help><span class="ti">?</span><span class="sp"><b>Help &amp; tour</b><small>How the app works, questions and tips</small></span><span class="chev">›</span></button>
-    <div class="vbuild">UP<i>/</i>LIFT v${APP.version}.${APP.build} · ${APP.date}</div>`;
+    <div class="vbuild">UP<i>/</i>LIFT v${APP.version} · ${APP.date}</div>`;
   el.querySelectorAll("details.dd").forEach(d=>d.ontoggle=()=>{ const s=LS.get("liftlog.dd",{})||{}; s[d.dataset.dd]=d.open; LS.set("liftlog.dd",s); });
   const flash=()=>{ const s=$("#blSaved"); if(s){ s.textContent="✓ Saved"; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent="",1200); } };
   el.querySelectorAll("[data-p]").forEach(inp=>{ inp.oninput=inp.onchange=()=>{ const pr=getProfile(); const v=inp.value.trim(); if(v) pr[inp.dataset.p]=inp.value; else delete pr[inp.dataset.p]; LS.set("liftlog.profile",pr); renderCountdown(); renderEnergy();
@@ -1497,13 +1587,19 @@ function renderBaseline(){
   el.querySelectorAll("input[data-b]").forEach(inp=>{
     inp.onfocus=()=>inp.select();
     inp.oninput=()=>{ const all=LS.get("liftlog.baseline",{})||{}; const n=inp.dataset.b, f=inp.dataset.f;
-      const val= f==="t" ? parseTime(inp.value) : num(inp.value);
-      const b={...(all[n]||{})}; if(val==null) delete b[f]; else b[f]=val; b.date=new Date().toISOString();
+      const val= f==="t" ? parseTime(inp.value) : (f==="d"&&inp.dataset.k==="c") ? parseKm(inp.value) : num(inp.value);
+      const b={...(all[n]||{})}; if(val==null) delete b[f]; else b[f]=val; b.date=new Date().toISOString(); delete b.auto;
+      if(f==="w"&&inp.dataset.k==="w"){ if(exUnit(n)==="plates") b.u="plates"; else delete b.u; }
       if(["w","r","d","t","a"].some(k=>b[k]!=null)) all[n]=b; else delete all[n];
       LS.set("liftlog.baseline",all); flash(); };
   });
-  $("#blAdd").onclick=()=>pickExercise({title:"Add a lift", only:"w", onPick:(n)=>{ const all=LS.get("liftlog.baseline",{})||{}; if(!all[n]) all[n]={date:new Date().toISOString()};
-    if(!KNOWN[n]) KNOWN[n]={kind:"w"}; LS.set("liftlog.baseline",all); const y=window.scrollY; renderBaseline(); window.scrollTo(0,y); }});
+  const blAddName=(n)=>{ const all=LS.get("liftlog.baseline",{})||{}; if(!all[n]) all[n]={date:new Date().toISOString()};
+    if(!KNOWN[n]) KNOWN[n]={kind:exInfo(n).kind,unit:exInfo(n).unit}; LS.set("liftlog.baseline",all); const y=window.scrollY; renderBaseline(); window.scrollTo(0,y); };
+  el.querySelectorAll("[data-blq]").forEach(b=>b.onclick=()=>blAddName(b.dataset.blq));
+  el.querySelectorAll("[data-blprog]").forEach(b=>b.onclick=()=>{ show("log"); setTimeout(()=>openProgramSheet(),50); });
+  el.querySelectorAll("[data-blplan]").forEach(b=>b.onclick=openSetupSheet);
+  $("#blAdd").onclick=()=>pickExercise({title:"Add exercise", onPick:(n)=>{ const all=LS.get("liftlog.baseline",{})||{}; if(!all[n]) all[n]={date:new Date().toISOString()};
+    if(!KNOWN[n]) KNOWN[n]={kind:exInfo(n).kind,unit:exInfo(n).unit}; LS.set("liftlog.baseline",all); const y=window.scrollY; renderBaseline(); window.scrollTo(0,y); }});
 }
 function exCard(it,i){
   if(it.kind==="w" && it.lo==null){ const t=getTarget(it.name); Object.assign(it,{lo:t.lo,hi:t.hi,rest:t.rest,step:t.step}); }
@@ -1516,7 +1612,7 @@ function exCard(it,i){
   const prog = active&&active.editing ? null : progressionFor(it);
   const tgt = it.kind==="w" ? `<button class="tgt" data-tgt="${i}">🎯 ${it.sets.length} × ${it.lo}–${it.hi} · rest ${fmtTime(it.rest)}</button>` : "";
   const advice = prog ? `<div class="adv ${prog.state}">${{up:"↑",down:"↓",hold:"=",reps:"+1",new:"★",base:"◎"}[prog.state]} ${esc(prog.msg)}</div>` : "";
-  const heads = it.kind==="w" ? ["kg","reps","RIR"] : it.kind==="c" ? ["m or km","time","pace/km"] : [it.unit||"amount","kg","time"];
+  const heads = it.kind==="w" ? [`<button class="unitsw" data-unit="${i}" title="Switch kg / plates">${wU(it)} ⇄</button>`,"reps","RIR"] : it.kind==="c" ? ["km","time","pace/km"] : [it.unit||"amount","kg","time"];
   return `<div class="ex" data-ex="${i}">
     <div class="exhead"><div class="exname">${esc(it.name)}</div>
       <button class="iconbtn" data-up="${i}" title="Move up">↑</button>
@@ -1540,6 +1636,8 @@ function watchBlock(it,i){ const w=it.watch||{};
   return `<details class="watch" ${watchOf(it)?"open":""}><summary>⌚ From your watch <small>${watchOf(it)?"added":"optional"}</small></summary>
     <div class="wgrid">${f("kcal","Active kcal","kcal","450")}${f("hr","Avg HR","bpm","150")}${f("elev","Elevation","m","40")}</div>
     <div class="muted" style="font-size:11.5px;margin-top:6px">Calories from your watch replace the app's estimate for this exercise. Use <b>active</b> calories, not total.</div></details>`; }
+function kmVal(m){ return m==null||m===""?"":String(+(m/1000).toFixed(2)); }
+function parseKm(v){ const s=String(v??"").trim().toLowerCase().replace(/\s*k?m$/,""); const n=num(s); if(n==null||n<=0) return null; return n>=100?Math.round(n):Math.round(n*1000); } // km; 100+ is taken as metres
 function parseDist(v){ // metres; "5k", "5km" or a decimal under 100 (e.g. 29.39) are read as km
   const s=String(v||"").trim().toLowerCase(); if(!s) return null; const n=num(s.replace(/k(m)?$/,"")); if(n==null) return null;
   return (/k/.test(s) || (s.includes(".") && n<100)) ? Math.round(n*1000) : n; }
@@ -1548,7 +1646,7 @@ function setRow(it,i,s,j,ph){
   const inp=(f,val,phv,mode="decimal")=>`<input inputmode="${mode}" data-f="${f}" data-i="${i}" data-j="${j}" value="${val==null?"":esc(f==="t"?fmtTime(val):val)}" placeholder="${phv==null?"":esc(f==="t"?fmtTime(phv):phv)}"${f==="w"?` data-ph0="${esc((ph._base!==undefined?ph._base:ph.w)??"")}"`:""}>`;
   let cells;
   if(it.kind==="w") cells = inp("w",s.w,ph.w)+inp("r",s.r,ph.r,"numeric")+inp("q",s.q,"–","numeric");
-  else if(it.kind==="c"){ const pd=ph.d??it.def?.d; cells = inp("d",s.d,pd,"decimal")+inp("t",s.t,ph.t,"text")+
+  else if(it.kind==="c"){ const pd=ph.d??it.def?.d; cells = `<input inputmode="decimal" data-f="d" data-i="${i}" data-j="${j}" value="${kmVal(s.d)}" placeholder="${pd==null?"km":kmVal(pd)}">`+inp("t",s.t,ph.t,"text")+
     `<input inputmode="text" data-f="p" data-i="${i}" data-j="${j}" value="${pace(s.d,s.t)?fmtTime(pace(s.d,s.t)):""}" placeholder="${pace(pd,ph.t)?fmtTime(pace(pd,ph.t)):"m:ss"}">`; }
   else cells = inp("a",s.a,ph.a??it.def?.a,"numeric")+inp("w",s.w,ph.w)+inp("t",s.t,ph.t,"text");
   return `<div class="setrow ${it.kind==="s"?"three":it.kind!=="s"?"four":""} ${s.done?"done":""} ${s.done?rateCls(it,s):""}" data-row="${i}-${j}"><span class="n">${j+1}</span>${cells}<button class="chk" data-chk="${i}-${j}">✓</button></div>`;
@@ -1564,9 +1662,9 @@ function bindEx(){
   const root=$("#exlist");
   root.querySelectorAll("input[data-f]").forEach(inp=>{
     inp.oninput=()=>{ const i=+inp.dataset.i, j=+inp.dataset.j, it=active.items[i], s=it.sets[j], f=inp.dataset.f;
-      if(f==="p"){ const sec=parseTime(inp.value), d=s.d??num(document.querySelector(`input[data-f="d"][data-i="${i}"][data-j="${j}"]`)?.placeholder);
+      if(f==="p"){ const sec=parseTime(inp.value), d=s.d??parseKm(document.querySelector(`input[data-f="d"][data-i="${i}"][data-j="${j}"]`)?.placeholder);
         if(sec&&d){ s.t=Math.round(sec*d/1000); const te=document.querySelector(`input[data-f="t"][data-i="${i}"][data-j="${j}"]`); if(te) te.value=fmtTime(s.t); } saveDraft(); return; }
-      s[f] = f==="t" ? parseTime(inp.value) : (f==="d"&&it.kind==="c") ? parseDist(inp.value) : num(inp.value); saveDraft();
+      s[f] = f==="t" ? parseTime(inp.value) : (f==="d"&&it.kind==="c") ? parseKm(inp.value) : num(inp.value); saveDraft();
       if(it.kind==="c"&&(f==="d"||f==="t")){ const pe=document.querySelector(`input[data-f="p"][data-i="${i}"][data-j="${j}"]`); const pv=pace(s.d,s.t); if(pe&&document.activeElement!==pe) pe.value=pv?fmtTime(pv):""; }
       if(f==="w") carryWeight(i); };
     inp.onfocus=()=>inp.select();
@@ -1577,7 +1675,7 @@ function bindEx(){
     const [i,j]=b.dataset.chk.split("-").map(Number); const it=active.items[i], s=it.sets[j];
     const row=b.closest(".setrow");
     if(!s.done){ // fill blanks from placeholders
-      row.querySelectorAll("input").forEach(inp=>{ if(!inp.value && inp.placeholder && inp.dataset.f!=="q" && inp.dataset.f!=="p"){ inp.value=inp.placeholder; const f=inp.dataset.f; s[f]= f==="t"?parseTime(inp.value):(f==="d"&&it.kind==="c")?parseDist(inp.value):num(inp.value);} });
+      row.querySelectorAll("input").forEach(inp=>{ if(!inp.value && inp.placeholder && inp.dataset.f!=="q" && inp.dataset.f!=="p"){ inp.value=inp.placeholder; const f=inp.dataset.f; s[f]= f==="t"?parseTime(inp.value):(f==="d"&&it.kind==="c")?parseKm(inp.value):num(inp.value);} });
       if(it.kind==="c"){ const pe=row.querySelector('input[data-f="p"]'); const ps=parseTime(pe?.value);
         if(!s.t && ps && s.d){ s.t=Math.round(ps*s.d/1000); const te=row.querySelector('input[data-f="t"]'); if(te) te.value=fmtTime(s.t); }
         if(pe){ const pv=pace(s.d,s.t); if(pv) pe.value=fmtTime(pv); } }
@@ -1586,7 +1684,7 @@ function bindEx(){
       // copy this set's values into the next set (if it's still empty) so you only edit what changes
       const n=it.sets[j+1];
       if(n && !n.done && ["w","r","d","t","a","q"].every(f=>n[f]==null || (it.def&&n[f]===it.def[f]))){
-        ["w","r","d","t","a","q"].forEach(f=>{ if(s[f]!=null){ n[f]=s[f]; const el=document.querySelector(`input[data-f="${f}"][data-i="${i}"][data-j="${j+1}"]`); if(el) el.value = f==="t"?fmtTime(s[f]):s[f]; } });
+        ["w","r","d","t","a","q"].forEach(f=>{ if(s[f]!=null){ n[f]=s[f]; const el=document.querySelector(`input[data-f="${f}"][data-i="${i}"][data-j="${j+1}"]`); if(el) el.value = f==="t"?fmtTime(s[f]):(f==="d"&&it.kind==="c")?kmVal(s[f]):s[f]; } });
         carryWeight(i);
       }
     } else { s.done=false; row.classList.remove("done","top","low"); }
@@ -1596,6 +1694,9 @@ function bindEx(){
   root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ const it=active.items[+b.dataset.rm]; it.sets.pop(); saveDraft(); rerenderEx(+b.dataset.rm); });
   root.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.del; confirmDlg(`Remove ${active.items[i].name}?`,"Remove",()=>{active.items.splice(i,1);saveDraft();renderLog();}); });
   root.querySelectorAll("[data-tgt]").forEach(b=>b.onclick=()=>editTarget(+b.dataset.tgt));
+  root.querySelectorAll("[data-unit]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.unit, it=active.items[i]; const to=isPl(it)?"kg":"plates";
+    if(to==="plates") it.unit="plates"; else delete it.unit; setExUnit(it.name,to); delete it.sugW;
+    it.sets.forEach(s=>{ if(!s.done) delete s.w; }); saveDraft(); rerenderEx(i); toast(to==="plates"?"Logging in plates for "+it.name:"Logging in kg for "+it.name); });
   root.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.up; if(i===0) return; [active.items[i-1],active.items[i]]=[active.items[i],active.items[i-1]]; saveDraft(); renderLog(); });
 }
 function targetModal(name, cur, onSave){
@@ -1652,10 +1753,10 @@ async function finishSession(){
   // drop empty sets / items
   const items = active.items.map(it=>({name:it.name,kind:it.kind,...(it.unit?{unit:it.unit}:{}),...(it.kind==="w"&&it.lo!=null?{lo:it.lo,hi:it.hi}:{}),...(watchOf(it)?{watch:watchOf(it)}:{}),sets:it.sets.filter(s=>s.done).map(s=>{const o={done:true};["w","r","d","t","a","q"].forEach(k=>{if(s[k]!=null)o[k]=s[k]});return o;})})).filter(it=>it.sets.length);
   if(!items.length){ confirmDlg("No sets are ticked yet. Tick ✓ on the sets you completed, or discard the session.","OK",()=>{},true); return; }
-  const doc={ date:active.date, name:active.name||"Session", items, notes:active.notes||"", durationMin:active.editing?active.durationMin:Math.round((Date.now()-active.startedAt)/60000), ...(active.oneOff?{oneOff:true}:{}), ...(active.editing&&active.comment?{comment:active.comment}:{}) };
+  const doc={ date:active.date, name:GENERIC_NAME.test((active.name||"").trim())?autoName(items):active.name.trim().slice(0,40), items, notes:active.notes||"", durationMin:active.editing?active.durationMin:Math.round((Date.now()-active.startedAt)/60000), ...(active.oneOff?{oneOff:true}:{}), ...(active.editing&&active.comment?{comment:active.comment}:{}) };
   const id=active.id;
   const btn=$("#finish"); btn.disabled=true; btn.textContent="Saving…";
-  try{ await putSession(id,doc); }
+  try{ await putSession(id,doc); updateBaselinesFrom(doc); }
   catch(e){ btn.disabled=false; btn.textContent="Finish & save"; showBanner(e&&e.code==="quota_exceeded" ? "Storage is full — delete some old sessions and try again." : "Couldn't save just now. Your draft is kept on this phone — try again in a moment."); return; }
   if(active.editing){ active=null; LS.del("liftlog.draft"); stopRest(); toast("Changes saved ✓"); renderLog(); openSession(id); return; }
   const planned=active; const change=dayChanges(planned);
@@ -1663,7 +1764,7 @@ async function finishSession(){
   renderLog();
   const after=()=>openSession(id, true);
   if(change) askUpdateDay(change, after);
-  else if(!planned.dayId && planned.items.some(i=>(i.name||"").trim())) askSaveAsDay(planned.name, planned.items, after);
+  else if(!planned.dayId && planned.items.some(i=>(i.name||"").trim())) askSaveAsDay(doc.name, planned.items, after);
   else after();
 }
 /* ---------- keep program days in step with what you actually do ---------- */
@@ -1793,7 +1894,7 @@ function histCard(s){
   const names=(s.items||[]).map(i=>i.name), st=sessionStats(s);
   const kind = st.hasW&&st.hasC ? "mix" : st.hasC ? "cardio" : "strength";
   return `<button class="hist ${kind}" data-h="${s.id}">
-    <div class="top"><b>${esc(s.name)}${s.comment?'<span class="tag claude">coached</span>':""}</b><span class="d">${fmtDate(s.date)}</span></div>
+    <div class="top"><b>${esc(sName(s))}${s.comment?'<span class="tag claude">coached</span>':""}</b><span class="d">${fmtDate(s.date)}</span></div>
     ${statChips(s)}${watchLine(s)}
     <div class="meta">${esc(names.slice(0,4).join(", "))}${names.length>4?` +${names.length-4} more`:""}</div>
     ${s.comment?`<div class="c">${esc(s.comment)}</div>`:""}
@@ -1942,7 +2043,7 @@ function openSession(id, autoCoach=false){
     it.sets.map((x,j)=>`<tr><td class="muted">Set ${j+1}</td><td>${esc(setSummary(it,x)||"–")}</td></tr>`).join("")).join("");
   const {v,sets}=sessionVolume(s);
   modal(`<div class="sheet">
-    <div class="row"><h3 class="sp">${esc(s.name)}</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="row" id="snameRow"><h3 class="sp" id="snameH">${esc(sName(s))}</h3><button class="iconbtn" id="renameBtn" title="Rename">✎</button><button class="iconbtn" data-close>✕</button></div>
     <div class="muted" style="font-size:13px">${fmtDate(s.date,{weekday:"long",day:"numeric",month:"long"})} · ${sets} set${sets===1?"":"s"}</div>
     ${statChips(s)}${watchLine(s)}
     ${ups?`<div class="adv up" style="margin-top:10px">↑ Progressed on ${ups} exercise${ups>1?"s":""} vs last time</div>`:""}
@@ -1954,7 +2055,13 @@ function openSession(id, autoCoach=false){
       <button class="btn small danger" id="delBtn">Delete</button>
     </div></div>`);
   bindCoach(s);
-  $("#toProgBtn").onclick=()=>askSaveAsDay(s.name, s.items, null, true);
+  $("#renameBtn").onclick=()=>{ const row=$("#snameRow"); row.innerHTML=`<input id="renameIn" class="sp" value="${esc(sName(s))}" maxlength="40" style="font-weight:700;font-size:17px"><button class="btn small primary" id="renameOk">Save</button>`;
+    const inp=$("#renameIn"); inp.focus(); inp.select();
+    const done=async()=>{ const nm=inp.value.trim().slice(0,40)||autoName(s.items); const doc={...s,name:nm}; delete doc.id;
+      try{ await putSession(s.id,doc); }catch(e){ showBanner("Couldn't rename right now."); return; }
+      const y=window.scrollY; show(view); window.scrollTo(0,y); openSession(s.id); toast("Renamed ✓"); };
+    $("#renameOk").onclick=done; inp.onkeydown=e=>{ if(e.key==="Enter") done(); }; };
+  $("#toProgBtn").onclick=()=>askSaveAsDay(sName(s), s.items, null, true);
   $("#editBtn").onclick=()=>{ closeModal(); if(active&&!active.editing){ confirmDlg("You have a session in progress. Finish or discard it before editing an old one.","OK",()=>show("log"),true); return; } editSession(s); };
   $("#repeatBtn").onclick=()=>{ closeModal(); if(active){ confirmDlg("You already have a session in progress. Replace it?","Replace",()=>repeat(s)); } else repeat(s); };
   $("#delBtn").onclick=()=>confirmDlg("Delete this session for good?","Delete",async()=>{ try{ await delSession(s.id); closeModal(); toast("Deleted"); show(view);}catch(e){ showBanner("Couldn't delete right now."); } });
@@ -1985,7 +2092,7 @@ async function copyText(t,msg){
   catch(e){ modal(`<div class="sheet"><div class="row"><h3 class="sp">Copy this</h3><button class="iconbtn" data-close>✕</button></div><textarea style="min-height:50vh;font-size:12px" readonly>${esc(t)}</textarea></div>`); }
 }
 function compactSession(s){
-  return `${fmtDate(s.date,{weekday:"short",day:"numeric",month:"short",year:"numeric"})} — ${s.name}${s.durationMin?` (${s.durationMin} min)`:""}${sessionKcal(s)?`, ~${sessionKcal(s)} kcal est.`:""}\n`+
+  return `${fmtDate(s.date,{weekday:"short",day:"numeric",month:"short",year:"numeric"})} — ${sName(s)}${s.durationMin?` (${s.durationMin} min)`:""}${sessionKcal(s)?`, ~${sessionKcal(s)} kcal est.`:""}\n`+
     (s.items||[]).map(it=>`  ${it.name}${it.lo!=null?` [target ${it.lo}-${it.hi} reps]`:""}: ${it.sets.map(x=>setSummary(it,x)).filter(Boolean).join(", ")}${it.watch?` [watch: ${[it.watch.kcal&&it.watch.kcal+" active kcal",it.watch.hr&&"avg HR "+it.watch.hr+" bpm",it.watch.elev&&it.watch.elev+" m elevation gain"].filter(Boolean).join(", ")}]`:""}`).join("\n")+
     (s.notes?`\n  Notes: ${s.notes}`:"");
 }
@@ -2136,6 +2243,41 @@ function bodyweightHtml(){
     <div class="row" style="margin-top:12px"><input id="wIn" inputmode="decimal" placeholder="Log today's weight (kg)"><button class="btn primary" id="wSave">Save</button></div>
   </div>`;
 }
+/* ---------- Log a run: a finished run, walk, ride or row straight into history (no live session) ---------- */
+const RUN_TYPES=[["Run","🏃 Run"],["Walk","🚶 Walk"],["Bike","🚴 Ride"],["Rowing","🚣 Row"]];
+function openRunSheet(){
+  let type=LS.get("liftlog.lastRunType","Run"); if(!RUN_TYPES.some(([n])=>n===type)) type="Run";
+  const now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset()); const nowVal=now.toISOString().slice(0,16);
+  const L=(lab,inner)=>`<label style="display:block"><span class="muted" style="font-size:12px">${lab}</span>${inner}</label>`;
+  modal(`<div class="sheet">
+    <div class="row"><h3 class="sp">Log a run</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="muted" style="font-size:13px;margin-bottom:12px">Already done? Add it here and it goes straight into your history.</div>
+    <div class="chips" id="rqType" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">${RUN_TYPES.map(([n,l])=>`<button class="chip ${n===type?"on":""}" data-rt="${n}">${l}</button>`).join("")}</div>
+    <div class="rqgrid">
+      ${L("Distance (km)",`<input id="rqD" inputmode="decimal" placeholder="e.g. 5.2">`)}
+      ${L("Time",`<input id="rqT" inputmode="text" placeholder="28:36 or 1:05:00">`)}
+      <div style="grid-column:span 2" class="muted" id="rqPace">Pace: –</div>
+      <div style="grid-column:span 2">${L("When",`<input id="rqWhen" type="datetime-local" value="${nowVal}" max="${nowVal}">`)}</div>
+      <div style="grid-column:span 2" class="muted rqopt">From your watch (optional)</div>
+      <div class="rq3">${L("Avg HR",`<input id="rqHr" inputmode="numeric" placeholder="bpm">`)}${L("Calories",`<input id="rqKcal" inputmode="numeric" placeholder="kcal">`)}${L("Elevation",`<input id="rqElev" inputmode="numeric" placeholder="m">`)}</div>
+      <div style="grid-column:span 2">${L("Notes (optional)",`<input id="rqNote" maxlength="300" placeholder="How did it feel?">`)}</div>
+    </div>
+    <button class="btn primary block" id="rqSave" style="margin-top:14px">Save run</button></div>`);
+  const upd=()=>{ const d=parseKm($("#rqD").value), t=parseTime($("#rqT").value), p=pace(d,t); $("#rqPace").textContent=p?`Pace: ${fmtTime(p)} /km`:"Pace: –"; };
+  $("#rqD").oninput=upd; $("#rqT").oninput=upd;
+  document.querySelectorAll("[data-rt]").forEach(b=>b.onclick=()=>{ type=b.dataset.rt; document.querySelectorAll("[data-rt]").forEach(x=>x.classList.toggle("on",x===b)); });
+  $("#rqSave").onclick=async()=>{
+    const d=parseKm($("#rqD").value), t=parseTime($("#rqT").value);
+    if(!d&&!t){ toast("Add a distance or a time"); return; }
+    const w={}; [["hr","#rqHr"],["kcal","#rqKcal"],["elev","#rqElev"]].forEach(([k,sel])=>{ const v=num($(sel).value); if(v!=null&&v>0) w[k]=Math.round(v); });
+    const when=$("#rqWhen").value&&$("#rqWhen").value!==nowVal?new Date($("#rqWhen").value):new Date(); const date=(isNaN(when)||when>new Date()?new Date():when).toISOString();
+    const set={done:true}; if(d) set.d=d; if(t) set.t=t;
+    const items=[{name:type,kind:"c",...(Object.keys(w).length?{watch:w}:{}),sets:[set]}];
+    const doc={date, name:autoName(items), items, notes:$("#rqNote").value.trim().slice(0,1000), durationMin:t?Math.round(t/60):0};
+    const id="s"+Date.now(); $("#rqSave").disabled=true;
+    try{ await putSession(id,doc); updateBaselinesFrom(doc); }catch(e){ $("#rqSave").disabled=false; showBanner("Couldn't save just now — try again."); return; }
+    LS.set("liftlog.lastRunType",type); closeModal(); toast(`${doc.name} saved 💪`); renderCountdown(); const y=window.scrollY; show(view); window.scrollTo(0,y); };
+}
 /* ---------- strength: working loads, with a detail page per lift ---------- */
 function liftHistory(name){ // oldest → newest, one entry per session that did this lift
   const out=[];
@@ -2144,11 +2286,11 @@ function liftHistory(name){ // oldest → newest, one entry per session that did
     const sets=(it.sets||[]).filter(x=>x.done!==false && (x.r||x.w)); if(!sets.length) return;
     const top=sets.reduce((a,b)=>((b.w||0)>(a.w||0)||((b.w||0)===(a.w||0)&&(b.r||0)>(a.r||0)))?b:a);
     const best1=Math.max(0,...sets.map(x=>e1rm(x.w,x.r)));
-    out.push({id:s.id, date:s.date, sets, top, e1:best1, item:it});
+    out.push({id:s.id, date:s.date, sets, top, e1:best1, item:it, pl:it.unit==="plates"});
   }));
-  return out;
+  const last=out[out.length-1]; return last? out.filter(x=>x.pl===last.pl) : out; // charts stay in the unit you log it in now
 }
-function loadText(x){ return x.w?`${x.w} kg × ${x.r??"?"}`:`${x.r??"?"} reps`; }
+function loadText(x,pl){ return x.w?`${x.w} ${pl?"pl":"kg"} × ${x.r??"?"}`:`${x.r??"?"} reps`; }
 function strengthListHtml(){
   const names=[]; sessions.forEach(s=>(s.items||[]).forEach(i=>{ if(i.kind==="w"&&!names.includes(i.name)) names.push(i.name); }));
   const rows=names.map(n=>({n,h:liftHistory(n)})).filter(r=>r.h.length);
@@ -2158,7 +2300,7 @@ function strengthListHtml(){
     return `<button class="wlrow" data-exd="${esc(n)}">
       <div class="nm">${esc(n)}<small>${fmtDate(last.date,{day:"numeric",month:"short"})} · ${last.sets.length} set${last.sets.length===1?"":"s"}</small></div>
       <div>${spark(h.map(x=>x.top.w||x.top.r||0),70,24)}</div>
-      <div class="v">${loadText(last.top)}<i class="tr ${trend}">${{up:"▲",down:"▼",eq:"=",new:""}[trend]}</i></div><span class="chev">›</span></button>`; }).join("")}</div>`;
+      <div class="v">${loadText(last.top,last.pl)}<i class="tr ${trend}">${{up:"▲",down:"▼",eq:"=",new:""}[trend]}</i></div><span class="chev">›</span></button>`; }).join("")}</div>`;
 }
 function bigChart(series, w=340, hgt=150, opt={}){ // series: [{vals:[...], color, dash}] sharing one x axis
   const all=series.flatMap(s=>s.vals).filter(v=>v!=null); if(all.length<1) return "";
@@ -2174,24 +2316,24 @@ function openExerciseDetail(name){
   const h=liftHistory(name); if(!h.length) return;
   const last=h[h.length-1], first=h[0];
   const bestE=h.reduce((a,b)=>b.e1>a.e1?b:a), heaviest=h.reduce((a,b)=>((b.top.w||0)>(a.top.w||0))?b:a);
-  const hasW=h.some(x=>x.top.w);
+  const hasW=h.some(x=>x.top.w), U=last.pl?"plates":"kg";
   const chg = hasW && h.length>1 ? +(last.top.w-first.top.w).toFixed(2) : null;
   modal(`<div class="sheet">
     <div class="row"><h3 class="sp">${esc(name)}</h3><button class="iconbtn" data-close>✕</button></div>
     <div class="muted" style="font-size:13px">${h.length} session${h.length===1?"":"s"} logged · since ${fmtDate(first.date,{day:"numeric",month:"short",year:"numeric"})}</div>
     <div class="exstats">
-      <div><small>Working load</small><b>${loadText(last.top)}</b><em>${fmtDate(last.date,{day:"numeric",month:"short"})}</em></div>
-      ${hasW?`<div><small>Est. 1RM</small><b>${Math.round(last.e1)} kg</b><em>best ${Math.round(bestE.e1)} kg</em></div>
-      <div><small>Heaviest</small><b>${heaviest.top.w} kg</b><em>${chg!=null?(chg>0?`+${chg} kg since start`:chg<0?`${chg} kg since start`:"same as start"):""}</em></div>`:""}
+      <div><small>Working load</small><b>${loadText(last.top,last.pl)}</b><em>${fmtDate(last.date,{day:"numeric",month:"short"})}</em></div>
+      ${hasW?`${last.pl?"":`<div><small>Est. 1RM</small><b>${Math.round(last.e1)} kg</b><em>best ${Math.round(bestE.e1)} kg</em></div>`}
+      <div><small>Heaviest</small><b>${heaviest.top.w} ${U}</b><em>${chg!=null?(chg>0?`+${chg} ${U} since start`:chg<0?`${chg} ${U} since start`:"same as start"):""}</em></div>`:""}
     </div>
     ${h.length>1?`<div class="card" style="padding:12px 12px 8px">
-      <div class="legend"><span><i style="background:var(--accent)"></i>Working weight</span>${hasW?`<span><i style="background:var(--muted)"></i>Est. 1RM</span>`:""}</div>
-      ${bigChart(hasW?[{vals:h.map(x=>x.e1||null),color:"var(--muted)",dash:true},{vals:h.map(x=>x.top.w||null),color:"var(--accent)"}]:[{vals:h.map(x=>x.top.r),color:"var(--accent)"}])}
+      <div class="legend"><span><i style="background:var(--accent)"></i>Working ${last.pl?"plates":"weight"}</span>${hasW&&!last.pl?`<span><i style="background:var(--muted)"></i>Est. 1RM</span>`:""}</div>
+      ${bigChart(hasW?[...(last.pl?[]:[{vals:h.map(x=>x.e1||null),color:"var(--muted)",dash:true}]),{vals:h.map(x=>x.top.w||null),color:"var(--accent)"}]:[{vals:h.map(x=>x.top.r),color:"var(--accent)"}])}
       <div class="row muted" style="font-size:11px;margin-top:2px"><span class="sp">${fmtDate(first.date,{day:"numeric",month:"short"})}</span><span>${fmtDate(last.date,{day:"numeric",month:"short"})}</span></div>
     </div>`:`<div class="muted" style="font-size:13px;margin:12px 0">Log this lift again to see a progress chart.</div>`}
     <h2>History</h2>
     <div class="card" style="padding:4px 14px">${[...h].reverse().map(x=>`<button class="exh" data-exs="${x.id}"><span class="d">${fmtDate(x.date,{weekday:"short",day:"numeric",month:"short"})}</span><span class="s">${x.sets.map(s=>s.w?`${s.w}×${s.r}`:`${s.r}`).join(", ")}</span></button>`).join("")}</div>
-    ${hasW?`<div class="muted" style="font-size:11.5px;line-height:1.45;margin-top:10px">Est. 1RM is a rough guide worked out from your sets (weight × (1 + reps ÷ 30)). It's most accurate under about 10 reps.</div>`:""}
+    ${hasW&&!last.pl?`<div class="muted" style="font-size:11.5px;line-height:1.45;margin-top:10px">Est. 1RM is a rough guide worked out from your sets (weight × (1 + reps ÷ 30)). It's most accurate under about 10 reps.</div>`:""}
   </div>`);
   document.querySelectorAll("[data-exs]").forEach(b=>b.onclick=()=>openSession(b.dataset.exs));
 }
@@ -2317,13 +2459,13 @@ function renderProgress(){
    A full-height sheet with search, category tabs and a list that scrolls on phones
    (the browser's own suggestion dropdown doesn't scroll inside the app). */
 const CATALOG={
-  Chest:["Bench Press","Incline Bench Press","DB Bench Press","Incline DB Press","Decline Bench Press","Machine Chest Press","Cable Fly","Pec Deck","Push-Up","Dips"],
+  Chest:["Bench Press","Incline Bench Press","DB Bench Press","Incline DB Press","Decline Bench Press","Machine Chest Press","Cable Fly","High-to-Low Cable Fly","Low-to-High Cable Fly","Pec Deck","Push-Up","Dips"],
   Back:["Deadlift","Pull-Up","Chin-Up","Lat Pulldown","Barbell Row","Pendlay Row","DB Row","Chest-Supported Row","Seated Cable Row","Cable Row","T-Bar Row","Straight-Arm Pulldown","Rack Pull","Back Extension"],
   Shoulders:["Overhead Press","Seated DB Shoulder Press","Machine Shoulder Press","Arnold Press","DB Lateral Raise","Cable Lateral Raise","Rear Delt Fly","Face Pull","Upright Row","Shrug"],
   Legs:["Back Squat","Front Squat","Hack Squat","Goblet Squat","Leg Press","Bulgarian Split Squat","Walking Lunge","Step-Up","Romanian Deadlift","Hip Thrust","Good Morning","Leg Curl","Leg Extension","Calf Raise","Seated Calf Raise"],
   Arms:["DB Curl","Barbell Curl","Hammer Curl","Preacher Curl","Cable Curl","Triceps Pushdown","Overhead Triceps Extension","Skull Crusher","Close-Grip Bench Press"],
   Core:["Hanging Leg Raise","Cable Crunch","Ab Wheel","Pallof Press","Decline Sit-Up"],
-  Cardio:["Run","Easy Run","Tempo Run","Long Run","400 m Repeats","1 km Runs","Treadmill Run","Incline Walk","Rowing","Bike","Assault Bike","Stair Climber","Swim","Jump Rope","Warm-up Jog","Cool-down Jog"],
+  Cardio:["Run","Easy Run","Tempo Run","Long Run","400 m Repeats","1 km Runs","Treadmill Run","Walk","Incline Walk","Rowing","Bike","Assault Bike","Stair Climber","Swim","Jump Rope","Warm-up Jog","Cool-down Jog"],
   Stations:["SkiErg","Row","Sled Push","Sled Pull","Burpee Broad Jumps","Farmers Carry","Sandbag Lunges","Wall Balls","Burpees","Box Jumps","Kettlebell Swings","Thrusters"]};
 const STATION_REPS=["Wall Balls","Burpees","Box Jumps","Kettlebell Swings","Thrusters"];
 function exInfo(name){
@@ -2393,7 +2535,7 @@ function showBanner(t){ const b=$("#banner"); b.textContent=t; b.classList.remov
    Signed in = everything still saves on the device first, then syncs to the user's own rows in Supabase.
    Usernames are turned into a hidden address (name@upliftlog.app) because Supabase logins need one; no email is ever sent. */
 const SUPA = { url:"https://hmouplsqtozcrvtshxjo.supabase.co", key:"sb_publishable_36i68B-pMzA8GhwzybPDqw_194NShV9", domain:"upliftlog.app" };
-const SYNC_SETTINGS = ["profile","program","programs","baseline","targets","nextup"]; // liftlog.<name>
+const SYNC_SETTINGS = ["profile","program","programs","baseline","targets","nextup","units"]; // liftlog.<name>
 const SYNC_KEYS = new Set(["liftlog.sessions","liftlog.weights",...SYNC_SETTINGS.map(k=>"liftlog."+k)]);
 let syncing=false, syncTimer=null, applyingRemote=false, syncState={s:"idle",msg:""};
 const getAuth=()=>LS.get("liftlog.auth",null);
@@ -2523,13 +2665,14 @@ function accountHtml(){
       <div class="sp"><b>@${esc(a.username||"you")}</b><small id="syncLine"></small></div>
       <button class="btn small" id="syncNowBtn">Sync now</button></div>
     <label class="sharerow"><span><b>Share my sessions with friends</b><small>Leaderboard and feed: name, time, tons/km and one highlight</small></span><input type="checkbox" id="shareTog" ${shareOn()?"checked":""}></label>
-    <div class="row" style="gap:14px;margin-top:12px;font-size:13px"><button class="lnk" id="signOutBtn">Sign out</button><button class="lnk danger" id="delCloudBtn">Delete my cloud data</button></div></div>`;
+    <div class="row" style="gap:14px;margin-top:12px;font-size:13px;flex-wrap:wrap"><button class="lnk" id="chPassBtn">Change password</button><button class="lnk" id="signOutBtn">Sign out</button><button class="lnk danger" id="delCloudBtn">Delete my cloud data</button></div></div>`;
 }
 function bindAccount(){
   document.querySelectorAll("[data-auth]").forEach(b=>b.onclick=()=>openAuthSheet(b.dataset.auth));
   const s=$("#syncNowBtn"); if(s) s.onclick=()=>syncNow({toast:true});
   document.querySelectorAll("[data-avpick]").forEach(b=>b.onclick=openAvatarPicker);
   const o=$("#signOutBtn"); if(o) o.onclick=signOutFlow;
+  const cp=$("#chPassBtn"); if(cp) cp.onclick=openChangePassword;
   const d=$("#delCloudBtn"); if(d) d.onclick=deleteCloudFlow;
   const sh=$("#shareTog"); if(sh) sh.onchange=()=>{ const p=getProfile(); p.shareFeed=sh.checked; LS.set("liftlog.profile",p); toast(sh.checked?"Sharing with friends":"Sessions hidden from friends"); syncNow(); };
   paintSync();
@@ -2549,6 +2692,7 @@ function openAuthSheet(mode="login"){
       <label class="af">${ic("lock")}<input id="auPass" type="password" autocomplete="${signup?"new-password":"current-password"}" placeholder="Password"><button type="button" class="lnk" id="auShow">Show</button></label>
       ${signup?`<label class="af">${ic("ticket")}<input id="auCode" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Invite code"></label>
       <div class="ahint">Username: 3–20 letters, numbers, dots, dashes or underscores. Password: at least 8 characters. There's no email reset, so <b>remember your password</b>.</div>`:""}
+      ${signup?"":`<div style="text-align:right;margin:-4px 2px 0"><button type="button" class="lnk" id="auForgot" style="font-size:13px">Forgot password?</button></div>`}
       <div id="auErr"></div>
       <button class="btn primary block abtn" id="auGo">${signup?"Create account":"Sign in"}</button>
       <div class="anote">${signup?(hasLocal?"What's already on this device will be added to your account.":"Got the invite code from a friend? You're set."):(sessions.length?"Anything here that isn't in your account yet will be added to it.":"Your sessions, programs and profile will download to this device.")}</div>
@@ -2556,6 +2700,7 @@ function openAuthSheet(mode="login"){
     <div class="aswitch">${signup?`Already have an account? <button class="lnk" data-am="login">Sign in</button>`:`New to UP/LIFT? <button class="lnk" data-am="signup">Create an account</button>`}</div>
   </div>`);
   document.querySelectorAll("[data-am]").forEach(b=>b.onclick=()=>{ const u=$("#auUser").value; openAuthSheet(b.dataset.am); $("#auUser").value=u; });
+  const fg=$("#auForgot"); if(fg) fg.onclick=()=>openForgotPassword($("#auUser").value.trim().toLowerCase());
   $("#auShow").onclick=()=>{ const p=$("#auPass"); p.type=p.type==="password"?"text":"password"; $("#auShow").textContent=p.type==="password"?"Show":"Hide"; };
   const go=$("#auGo"), err=t=>{ $("#auErr").innerHTML=t?`<div class="banner">${esc(t)}</div>`:""; };
   const submit=async()=>{
@@ -2588,6 +2733,60 @@ function openAuthSheet(mode="login"){
   go.onclick=submit;
   document.querySelectorAll(".sheet input").forEach(i=>i.onkeydown=e=>{ if(e.key==="Enter") submit(); });
 }
+/* ---------- passwords: change it yourself; forgotten ones are reset by whoever hosts the app ---------- */
+function openChangePassword(){
+  const a=getAuth(); if(!a) return;
+  const P=(id,ph,ac)=>`<label class="af"><input id="${id}" type="password" autocomplete="${ac}" placeholder="${ph}"></label>`;
+  modal(`<div class="sheet auth">
+    <div class="row"><h3 class="sp">Change password</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="muted" style="font-size:13px;margin:2px 0 12px">For @${esc(a.username||"you")}. You'll stay signed in on this device.</div>
+    <div class="aform" style="padding:0">
+      ${P("cpOld","Current password","current-password")}
+      ${P("cpNew","New password (8+ characters)","new-password")}
+      ${P("cpNew2","Repeat new password","new-password")}
+      <label class="muted" style="font-size:13px;display:flex;gap:8px;align-items:center"><input type="checkbox" id="cpShow" style="width:auto"> Show passwords</label>
+      <div id="cpErr"></div>
+      <button class="btn primary block abtn" id="cpGo">Change password</button>
+    </div></div>`);
+  $("#cpShow").onchange=e=>["#cpOld","#cpNew","#cpNew2"].forEach(s=>$(s).type=e.target.checked?"text":"password");
+  const err=t=>{ $("#cpErr").innerHTML=t?`<div class="banner">${esc(t)}</div>`:""; }, go=$("#cpGo");
+  const submit=async()=>{
+    const o=$("#cpOld").value, n=$("#cpNew").value, n2=$("#cpNew2").value;
+    if(!o) return err("Enter your current password.");
+    if(n.length<8) return err("Use a new password of at least 8 characters.");
+    if(n!==n2) return err("The new passwords don't match.");
+    if(n===o) return err("That's the same as your current password.");
+    go.disabled=true; go.textContent="Changing…"; err("");
+    try{
+      const user=a.username, email=`${user}@${SUPA.domain}`;
+      const chk=await authFetch("/auth/v1/token?grant_type=password",{email,password:o}); // proves it's you, and gives a fresh sign-in for the change
+      if(!chk.ok){ if(chk.status===429) throw new Error("Too many attempts. Wait a few minutes and try again."); throw new Error("Your current password isn't right."); }
+      saveSession(chk.j,user);
+      let r; try{ r=await fetch(SUPA.url+"/auth/v1/user",{method:"PUT",headers:{apikey:SUPA.key,Authorization:"Bearer "+chk.j.access_token,"Content-Type":"application/json"},body:JSON.stringify({password:n})}); }
+      catch(e){ throw new Error("Can't reach the server. Check your connection and try again."); }
+      if(!r.ok){ let j={}; try{ j=await r.json(); }catch(e){} const m=String(j.msg||j.message||"").toLowerCase();
+        if(m.includes("weak")||m.includes("short")) throw new Error("That password isn't accepted. Try a longer one.");
+        throw new Error(j.msg||j.message||("Couldn't change it ("+r.status+")")); }
+      const re=await authFetch("/auth/v1/token?grant_type=password",{email,password:n}); if(re.ok) saveSession(re.j,user);
+      closeModal(); toast("Password changed ✓");
+    }catch(e){ err(e.message); go.disabled=false; go.textContent="Change password"; }
+  };
+  go.onclick=submit; document.querySelectorAll(".sheet input").forEach(i=>i.onkeydown=e=>{ if(e.key==="Enter") submit(); });
+}
+function openForgotPassword(user){
+  const msg=()=>`Hi! I forgot my UP/LIFT password. My username is ${user?"@"+user:"@________"}. Could you reset it for me? Thanks!`;
+  modal(`<div class="sheet">
+    <div class="row"><h3 class="sp">Forgot your password?</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="muted" style="font-size:13px;line-height:1.5;margin:2px 0 12px">UP/LIFT accounts don't use email, so the person who shared the app with you resets it. Send them this message, and they'll give you a temporary password. Then sign in and change it in <b>Profile → Account</b>.</div>
+    ${user?"":`<label style="display:block;margin-bottom:10px"><span class="muted" style="font-size:12px">Your username</span><input id="fpUser" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="username"></label>`}
+    <div class="card" id="fpMsg" style="font-size:14px;line-height:1.5;white-space:pre-wrap">${esc(msg())}</div>
+    <div class="row" style="gap:8px;margin-top:12px">${navigator.share?`<button class="btn primary sp" id="fpShare">Send…</button>`:""}<button class="btn sp ${navigator.share?"":"primary"}" id="fpCopy">Copy message</button></div>
+    <button class="btn block" style="margin-top:8px" id="fpBack">Back to sign in</button></div>`);
+  const u=$("#fpUser"); if(u) u.oninput=()=>{ user=u.value.trim().toLowerCase().replace(/^@/,""); $("#fpMsg").textContent=msg(); };
+  $("#fpCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText(msg()); toast("Copied — paste it to them"); }catch(e){ toast("Couldn't copy — press and hold the message to copy it"); } };
+  const sh=$("#fpShare"); if(sh) sh.onclick=async()=>{ try{ await navigator.share({text:msg()}); }catch(e){} };
+  $("#fpBack").onclick=()=>{ openAuthSheet("login"); if(user) $("#auUser").value=user; };
+}
 function clearAccountLocal(keepData){
   localStorage.removeItem("liftlog.friendsCache");
   if(!keepData){ ["sessions","weights",...SYNC_SETTINGS,"draft","sampleBackup","lastBackup"].forEach(k=>localStorage.removeItem("liftlog."+k)); }
@@ -2619,7 +2818,7 @@ function weekStart(d=new Date()){ const x=new Date(d); x.setHours(0,0,0,0); x.se
 function sessionHighlight(s){
   let best=null;
   (s.items||[]).forEach(it=>{ if(it.kind!=="w") return; (it.sets||[]).forEach(x=>{ if(x.done===false) return; const v=x.w?e1rm(x.w,x.r||1):(x.r||0)/100;
-    if(!best||v>best.v) best={v,t:x.w?`${it.name} ${x.w} kg × ${x.r??"?"}`:`${it.name} × ${x.r??"?"}`}; }); });
+    if(!best||v>best.v) best={v:it.unit==="plates"?(x.r||0)/100:v,t:x.w?`${it.name} ${x.w} ${it.unit==="plates"?"plates":"kg"} × ${x.r??"?"}`:`${it.name} × ${x.r??"?"}`}; }); });
   if(best) return best.t;
   let run=null; (s.items||[]).forEach(it=>{ if(it.kind!=="c") return; let d=0,t=0; (it.sets||[]).forEach(x=>{ if(x.done!==false&&x.d){ d+=x.d; t+=x.t||0; } }); if(d&&(!run||d>run.d)) run={d,t,n:it.name}; });
   if(run) return `${run.n} ${kmTxt(run.d)}${run.t?` @ ${fmtTime(Math.round(run.t/(run.d/1000)))}/km`:""}`;
@@ -2660,7 +2859,7 @@ function openAvatarPicker(){
 }
 function feedRow(s,uid){
   const t=sessionStats(s);
-  return {user_id:uid,session_id:s.id,started_at:s.date,title:String(s.name||"Session").slice(0,40),kind:t.hasW&&t.hasC?"mix":t.hasC?"cardio":"strength",
+  return {user_id:uid,session_id:s.id,started_at:s.date,title:String(sName(s)).slice(0,40),kind:t.hasW&&t.hasC?"mix":t.hasC?"cardio":"strength",
     minutes:t.min?Math.round(t.min):null,kg:t.kg?Math.round(t.kg):null,km:t.km?+t.km.toFixed(2):null,pace_s:t.pace?Math.round(t.pace):null,sets:t.sets||null,highlight:sessionHighlight(s).slice(0,80),
     ...(AVCOL?(a=>({avatar_e:a?a.e||null:null,avatar_c:a?a.c:null}))(myAvatar()):{})};
 }
@@ -2770,7 +2969,7 @@ async function toggleKudo(owner,sid){
   }catch(e){ showBanner("Couldn't save kudos: "+e.message); loadFriends(); }
 }
 
-const APP={version:"1.0", build:41, date:"19 Nov 2026"}; // bump build with every release (matches sw.js uplift-v<build>)
+const APP={version:"1.1.0", build:42, date:"22 Nov 2026"}; // version is what people see; bump build by 1 with every release (matches sw.js uplift-v<build>, keys PATCH_NOTES)
 /* ================== HELP & TOUR ================== */
 const TOUR=[
   {i:"👋",t:"Welcome to UP/LIFT",b:"Log your workouts, see your progress and train alongside friends. It runs in your browser: nothing to install, no ads, and everything is saved on your phone."},
@@ -2803,17 +3002,21 @@ const FAQ=[
   ["Can I log runs and watch data?","Yes. Runs take distance (e.g. <i>5k</i> or <i>29.39</i>), time and pace: fill in any two. Open <b>⌚ From your watch</b> to add active calories, average heart rate and elevation."],
   ["How are calories worked out?","Daily calories use your profile (Mifflin-St Jeor, or Katch-McArdle if you add body fat). Workout calories are estimates from the type and length of training, unless you enter your watch's active calories."],
   ["Is my data safe? What do friends see?","Without an account, everything stays on this device: use <b>Profile → Your data → Download backup</b> now and then. With an account it syncs to the cloud and only you can read it. Friends only see each session's name, time, tons or km and one highlight, and you can turn sharing off in Profile."],
-  ["I forgot my password","There's no email reset. Ask whoever shared the app with you to reset it for you."],
+  ["I forgot my password","There's no email reset. On the sign-in screen tap <b>Forgot password?</b> to get a message to send whoever shared the app with you. They'll give you a temporary password; then change it in <b>Profile → Account → Change password</b>."],
+  ["How do I log a run I've already done?","On <b>Log</b>, tap <b>🏃 Log a run</b>. Pick run, walk, ride or row, add the distance in km and your time, and save. It goes straight into your history, no session needed."],
+  ["The cable machine has no numbers. What do I log?","Tap <b>kg ⇄</b> above the sets to switch that exercise to <b>plates</b> and count the plates on the stack. Cable and machine exercises start in plates, and the app remembers your choice per exercise. Plate sets don't count toward your tons."],
   ["The app looks out of date","Close it fully and open it again; updates download in the background. Your version is shown at the bottom of Profile."]];
 function openHelp(){
   modal(`<div class="sheet help">
     <div class="row"><h3 class="sp">Help</h3><button class="iconbtn" data-close>✕</button></div>
+    <button class="card tourcta" id="hNews"><span class="ti">✦</span><span class="sp"><b>What's new in v${APP.version}</b><small>Patch notes for this update</small></span><span class="chev">›</span></button>
     <button class="card tourcta" id="hTour"><span class="ti">▶</span><span class="sp"><b>Take the quick tour</b><small>${TOUR.length} short cards · about a minute</small></span><span class="chev">›</span></button>
     <h2>Questions</h2>
     <div class="card faq">${FAQ.map(([q,a])=>`<details><summary>${q}</summary><div>${a}</div></details>`).join("")}</div>
-    <div class="vbuild">UP<i>/</i>LIFT v${APP.version}.${APP.build} · ${APP.date}</div>
+    <div class="vbuild">UP<i>/</i>LIFT v${APP.version} · ${APP.date}</div>
   </div>`);
   $("#hTour").onclick=()=>openTour(0);
+  $("#hNews").onclick=()=>openWhatsNew(true);
 }
 
 /* ================== BOOT ================== */
@@ -2847,7 +3050,46 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     setInterval(check,30*60*1000);
   }).catch(()=>{});
 }
-(()=>{ const seen=LS.get("liftlog.seenBuild",null); if(seen && seen<APP.build) setTimeout(()=>toast(`Updated to v${APP.version}.${APP.build} ✓`),700); LS.set("liftlog.seenBuild",APP.build); })();
+/* ---------- patch notes: shown once after an update, and any time from Help ---------- */
+const PATCH_NOTES={
+  42:{date:"22 Nov 2026", groups:[
+    ["Fixes",[
+      ["💾","Your sets are safer","Every change now saves instantly, with a <b>Saved ✓</b> sign under the timer. If UP/LIFT is open twice (home-screen icon and a browser tab), it no longer rolls your sets back."],
+      ["📏","Run distance in km","Type distances like <b>5.2</b> everywhere. Fixes iPhones that couldn't type “km”."]]],
+    ["New",[
+      ["🏃","Log a run","Already done a run, walk, ride or row? Tap <b>🏃 Log a run</b> on Log and it goes straight into your history."],
+      ["✎","Name your sessions","Tap the session name to change it, or ✎ on any past session. Leave it blank and it names itself, like “Run · 5.2 km”."],
+      ["🔩","kg or plates","Cable and machine exercises can be logged in <b>plates</b>. Tap <b>plates ⇄</b> above the sets to switch. The app remembers your choice for each exercise."],
+      ["🦋","More cable flies","High-to-Low and Low-to-High Cable Fly are now under Chest."],
+      ["◎","Better starting weights","Easier to set up without a program, and they now update to your latest sets after every session."],
+      ["🔑","Passwords","Change your password in <b>Profile → Account</b>. Forgot it? Tap <b>Forgot password?</b> on the sign-in page."]]]]}
+};
+function openWhatsNew(fromHelp){
+  const n=PATCH_NOTES[APP.build]; if(!n) return;
+  modal(`<div class="sheet">
+    <div class="row"><h3 class="sp">What's new</h3><button class="iconbtn" data-close>✕</button></div>
+    <div class="muted" style="font-size:13px;margin-bottom:6px">v${APP.version} · ${n.date}</div>
+    ${n.groups.map(([t,items])=>`<h2>${t}</h2><div class="card" style="padding:4px 14px">${items.map(([ic,ti,tx])=>`<div class="pn"><span class="pni">${ic}</span><div><b>${ti}</b><p>${tx}</p></div></div>`).join("")}</div>`).join("")}
+    <button class="btn primary block" data-close style="margin-top:14px">${fromHelp?"Close":"Got it"}</button></div>`);
+}
+function showUpdateCard(){ // a small card after an update; stays until opened or dismissed, then never again for this version
+  const n=PATCH_NOTES[APP.build]; if(!n||document.querySelector(".updcard")) return;
+  const heads=n.groups.flatMap(g=>g[1]).slice(0,3).map(x=>x[0]+" "+x[1]);
+  const more=n.groups.flatMap(g=>g[1]).length-heads.length;
+  const c=document.createElement("div"); c.className="updcard"; c.setAttribute("role","status");
+  c.innerHTML=`<button class="ucx" aria-label="Dismiss">✕</button>
+    <div class="uct"><span>✦</span><b>Updated to v${APP.version}</b></div>
+    <div class="ucl">${heads.map(t=>`<div>${esc(t)}</div>`).join("")}${more>0?`<div class="muted">+ ${more} more</div>`:""}</div>
+    <button class="btn small primary ucgo">See what's new</button>`;
+  const done=()=>{ LS.set("liftlog.notesSeen",APP.build); c.classList.add("out"); setTimeout(()=>c.remove(),250); };
+  c.querySelector(".ucx").onclick=done;
+  c.querySelector(".ucgo").onclick=()=>{ done(); openWhatsNew(false); };
+  document.body.appendChild(c); requestAnimationFrame(()=>c.classList.add("in"));
+}
+(()=>{ const seen=LS.get("liftlog.seenBuild",null);
+  if(seen && seen<APP.build) LS.set("liftlog.notesDue",APP.build);   // only people updating from an older version, not brand-new users
+  LS.set("liftlog.seenBuild",APP.build);
+  if(LS.get("liftlog.notesDue",0)===APP.build && LS.get("liftlog.notesSeen",0)<APP.build) setTimeout(showUpdateCard,900); })();
 </script>
 </body>
 </html>
